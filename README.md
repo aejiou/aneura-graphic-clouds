@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# aneura-graphic-clouds
-Generator of word/image graphic clouds based on user input.
-=======
 # ANeura Explorations: Graphic Clouds
 
 An object in the series of "graphic art"/"machine learning" explorations. The goal is to generate visually pleasing high resolution images containing word/image clouds based on the concept chosen by a user.
@@ -30,4 +26,3 @@ The project will consist of:
 ![Dota chat word cloud](images/dota.jpg)
 
 ![Other example of the word art](images/art.jpg)
->>>>>>> 1e3cc39... Update README.md
