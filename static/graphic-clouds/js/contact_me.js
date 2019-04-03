@@ -44,7 +44,6 @@ $(function() {
           if (status == 'success')
           {
             write_output(JSON.parse(jqXHR.responseText));
-            alert(my_obj);
             setTimeout(function() {
             $this.prop("disabled", false); // Re-enable submit button when AJAX call is complete
           }, 1000);
@@ -66,6 +65,5 @@ $(function() {
 
 /*When clicking on Full hide fail/success boxes */
 $('#name').focus(function() {
-  alert(1);
   $('#progress').html('');
 });

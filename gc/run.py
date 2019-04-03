@@ -1,7 +1,7 @@
-def generate_image(attr):
+def generate_image(form):
     from src import Canvas, Droplet
-    test = Canvas(500,250,(0,0,0))
-    test.fit('love',"fonts/SCB.TTF")
+    test = Canvas(int(form['im_width']),int(form['im_height']),(0,0,0))
+    test.fit(form['name'],"fonts/SCB.TTF")
 
     colors = [(num*2,num-30,num) for num in range(50,120,10)]
 
@@ -11,14 +11,13 @@ def generate_image(attr):
     for drop in drops:
         drop.fit("fonts/SCB.TTF")
 
-    for cycle in range(0,5):
+    for _ in range(0,5):
         for drop in drops:
             test.paste_object(drop)
 
-    test.img.save('static/tmp/test.jpg')
+    test.img.save('static/tmp/'+form['identifier']+'.jpg')
 
-    return {'concept':'love','src':'/tmp/test.jpg','caption':'blablabla'}
+    return {'concept':form['name'],'src':'/tmp/'+form['identifier']+'.jpg','caption':str(form)}
 
-    
 
     
