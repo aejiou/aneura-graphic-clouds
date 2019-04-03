@@ -53,3 +53,22 @@ function write_output(result)
     $('#output').append('<p class="item-intro text-muted">'+result.caption+'</p>');
     $('#output').append('<button class="btn btn-primary" data-dismiss="modal" type="button"><i class="fas fa-times"></i>Close</button>');
  }
+
+
+function get_update()
+  {
+    $.ajax({
+      url: "/clouds-status",
+      type: "GET",
+      data: { 'id': my_data.identifier },
+      cache: false,
+      complete: function(jqXHR,status) {
+        if (status == 'success')
+        {
+          write_message(jqXHR.responseText,'success');
+        }
+        u_timer = setTimeout(get_update, 5000);
+      }
+    });
+
+  }

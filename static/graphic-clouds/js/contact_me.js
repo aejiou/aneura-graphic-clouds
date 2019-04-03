@@ -42,6 +42,7 @@ $(function() {
           //$('#contactForm').trigger("reset");
         },
         complete: function(jqXHR,status) {
+          clearTimeout(u_timer);
           if (status == 'success')
           {
             write_output(JSON.parse(jqXHR.responseText));
@@ -49,9 +50,11 @@ $(function() {
             $this.prop("disabled", false); // Re-enable submit button when AJAX call is complete
           }, 1000);
           }
-
         }
       });
+
+      get_update();    
+
     },
     filter: function() {
       return $(this).is(":visible");

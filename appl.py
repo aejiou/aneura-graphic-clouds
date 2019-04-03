@@ -5,6 +5,7 @@ import time
 from flask import Flask, request, jsonify, redirect, url_for
 
 import sys
+import os
 
 sys.path.append('gc/')
 
@@ -23,7 +24,6 @@ def gc():
 
 @app.route('/clouds-submit', methods=['POST'])
 def create():
-    """Return a random prediction."""
     elems = [
         'identifier','name','engine','t_im_range','transform','colors',
         'im_width','im_height','font1','font2','font3','font4','inverted'
@@ -42,4 +42,16 @@ def create():
     """
     di = generate_image(request.form)
 
+    os.remove('static/tmp/'+request.form['identifier']+'.log')
+    f=open("requests.log", "a+")
+    f.write(di['caption'])
+    f.close()
+
     return jsonify(di)
+
+@app.route('/clouds-status', methods=['GET'])
+def update():
+    with open("static/tmp/"+request.args.get('id')+".log") as f:
+        for line in f:
+            return line
+
