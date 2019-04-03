@@ -10,7 +10,8 @@ from math import floor, ceil
 
 
 class Canvas:
-    def __init__(self,w,h,bg=(0,0,0)):
+    def __init__(self,w,h,bg=(0,0,0),reduce=4):
+        self.reduce = reduce
         self.w = w
         self.h = h
         self.bg = bg
@@ -24,25 +25,31 @@ class Canvas:
         self.filemask = filemask
         self.margins = margins
         self.invert = invert
-        self.mask = Image.new("L", (self.w,self.h),0)
+        self.mask_h = floor((self.h/self.reduce))
+        self.mask_w = floor((self.w/self.reduce))        
+        self.mask = Image.new("L", (self.mask_w,self.mask_h),0)
 
         
         if filemask == None:
             self.dmask = ImageDraw.Draw(self.mask)
-            (x, y), size = self._find_fontsize(self.w-(margins[0]+margins[2]),
-                                         self.h-(margins[1]+margins[3]),
+            (x, y), size = self._find_fontsize(self.mask_w-(margins[0]+margins[2]),
+                                         self.mask_h-(margins[1]+margins[3]),
                                          fontfile,word,showim=False)
             font = ImageFont.truetype(fontfile,size)
             self.dmask.text((x+margins[0], y+margins[1]),word,255,font=font)
         else:
             im = Image.open(filemask).convert('L')
             im.thumbnail(self.mask.size, Image.ANTIALIAS)
-            self.mask.paste(im,(round((self.w - im.size[0])/2),round((self.h-im.size[1])/2)))
+            self.mask.paste(im,(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2)))
             
         if invert:
             self.mask = ImageOps.invert(self.mask)
         
         self.th_mat = self._threshold_matrix(self.mask)
+        
+        self.ind_arr = np.zeros(self.th_mat.shape).astype(str)
+        for index in np.ndindex(self.th_mat.shape):
+            self.ind_arr[index] = "{} {}".format(*index)
         
         return self
 
@@ -76,7 +83,7 @@ class Canvas:
         pixels = img.load()
         w,h = img.size
         image_matrix = np.zeros((h,w))
-        threshold = lambda x: 1 if x>2 else 0
+        #threshold = lambda v: -1 if v>2 else 0
         for col in range(0,w):
             for row in range(0,h):
                 image_matrix[row,col]=pixels[col,row]>th
@@ -89,7 +96,7 @@ class Canvas:
         def _shape(val,shape='rect'):
             nonlocal ratio
             (x,y) = val
-            edge = min([x,y,self.h-x,self.w-y])
+            edge = min([x,y,self.mask_h-x,self.mask_w-y])
             if edge==0:
                 rad = 1
             else:
@@ -102,14 +109,12 @@ class Canvas:
                 else:
                     break
             return int(rad)
-        
-        #ratio = np.array(ratio)/max(ratio)
 
-        self.den_mat = np.zeros(self.th_mat.shape)-1
-        (h,w) = self.th_mat.shape
-        for index in np.ndindex(self.th_mat.shape):
-            if self.th_mat[index]==0:
-                self.den_mat[index] = _shape(index,shape)
+        self.den_mat = -self.th_mat
+        #(h,w) = self.th_mat.shape
+        for index_str in self.ind_arr[self.den_mat!=-1]:
+            index = [int(_) for _ in index_str.split(' ')]
+            self.den_mat[index[0]][index[1]] = _shape(index,shape)
                 
     def paste_object(self,obj,where='max'):
         img = obj.src.copy()
@@ -122,14 +127,16 @@ class Canvas:
         maxoptions = np.argwhere(self.den_mat.reshape(-1) == np.max(self.den_mat.reshape(-1)))
         choice = maxoptions[np.random.randint(0,maxoptions.size)]
         maxcenter = np.unravel_index(choice,self.den_mat.shape)
-        w, h = floor(ratio[0]*maxrad*2)-2, floor(maxrad*ratio[1]*2)-2
+        w, h = floor(ratio[0]*maxrad*2)-1, floor(maxrad*ratio[1]*2)-1
         x, y = int(ceil(maxcenter[1]-maxrad*ratio[0]))+1, int(ceil(maxcenter[0]-maxrad*ratio[1]))+1
+        img_full = img.copy()
+        img_full.thumbnail((w*self.reduce,h*self.reduce), Image.ANTIALIAS)
         img.thumbnail((w,h), Image.ANTIALIAS)
-        self.img.paste(img,(x,y))
+        self.img.paste(img_full,(x*self.reduce,y*self.reduce))
         img_g = img.convert('L')
-        self.mask.paste(img,(x,y))
+        self.th_mat[y:y+img_g.size[1],x:x+img_g.size[0]] = self._threshold_matrix(img_g)
+        self.mask.paste(img_g,(x,y)) #potentially unnecessary
         self.th_mat = self._threshold_matrix(self.mask)
-        return maxrad
 
 
 class Droplet:
