@@ -36,9 +36,6 @@ def monochrome(img,th=127):
     return Image.fromarray(((np.asarray(img)>th)*255).astype('uint8'))
 
 
-
-
-
 class Canvas:
     def __init__(self,w,h,cmap=((255,255,255),(0,0,0)),reduce=4):
         self.reduce = reduce
@@ -143,13 +140,11 @@ class Canvas:
         maxcenter = np.unravel_index(choice,self.den_mat.shape)
         w, h = ratio[0]*maxrad*2-1, maxrad*ratio[1]*2-1
         x, y = maxcenter[1]-maxrad*ratio[0]+1, maxcenter[0]-maxrad*ratio[1]+1
-        
+        w, h = floor(w), floor(h)
+        x, y = ceil(x), ceil(y)
         self.queue.append({'src':obj,'args':{'size':(w*self.reduce,h*self.reduce),
                                              'pos':(x*self.reduce,y*self.reduce), 
                                              'rotate':rotate}})
-        w, h = floor(w), floor(h)
-        x, y = ceil(x), ceil(y)
-
         img = img.resize((w,h), Image.ANTIALIAS)
         
         self.th_mat[y:y+img.size[1],x:x+img.size[0]] = self._threshold_matrix(img)
@@ -163,8 +158,8 @@ class Canvas:
                 img = element['src'].render((self.cmap[r_color],self.cmap[-1]))
                 if element['args']['rotate']:
                     img = img.rotate(90,Image.NEAREST,True)
-                w, h = ceil(element['args']['size'][0]), ceil(element['args']['size'][1])
-                x, y = ceil(element['args']['pos'][0]), ceil(element['args']['pos'][1])
+                w, h = element['args']['size'][0], element['args']['size'][1]
+                x, y = element['args']['pos'][0], element['args']['pos'][1]
                 img = img.resize((w,h), Image.ANTIALIAS)
                 self.img.paste(img,(x,y))
 
@@ -180,7 +175,7 @@ class Droplet:
         if self.image:
             self.src = Image.open(source)
             self.mask = monochrome(self.src)
-            self.w, self.h = img.size
+            self.w, self.h = self.src.size
         else:    
             self.font = ImageFont.truetype(source,500)
             tw, th = self.font.getsize(self.word)
@@ -191,7 +186,7 @@ class Droplet:
         self.mask = Image.new("L", (self.w,self.h),0)
         
         if self.image:
-            self.mask.paste(img,(0,0))
+            self.mask.paste(self.src,(0,0))
         else:
             draw = ImageDraw.Draw(self.mask)
             draw.text((2-self.offset_x,2-self.offset_y),self.word,255,font=self.font)

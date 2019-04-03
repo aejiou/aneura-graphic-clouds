@@ -12,19 +12,23 @@ def generate_image(form):
     stages = [
         'Creating all the objects',
         'Mapping cycle 1','Mapping cycle 2','Mapping cycle 3','Cycle 4','Cycle 5',
-        'Saving the final image']
+        'Rendering the final image']
     #global step 
     step = 1
 
     log_progress(form['identifier'])
 
-    test = Canvas(int(form['im_width']),int(form['im_height']),(0,0,0))
+    colors = [(num*2,num,num) for num in range(50,120,10)]
+    colors = [(0,0,0)] + colors + [(255,255,255)]
+
+    w, h = int(form['im_width']), int(form['im_height'])
+
+    test = Canvas(w,h,colors,round(w/500))
     test.fit(form['name'],"fonts/SCB.TTF")
 
-    colors = [(num*2,num-30,num) for num in range(50,120,10)]
-
-    drops = [Droplet(word,cmap=(color,(0,0,0))) for word,color in zip(['hello','world','all','is','fine','butterflies','unicorns'],colors)]
-    drops_u = [Droplet(word.upper(),cmap=(color,(0,0,0))) for word,color in zip(['hello','world','all','is','fine','butterflies','unicorns'],colors)]
+    drops = [Droplet(word) for word in ['hello','world','all','is','fine','butterflies','unicorns']]
+    drops_u = [Droplet(word.upper()) for word in ['hello','world','all','is','fine','butterflies','unicorns']]
+    
     drops += drops_u
     for drop in drops:
         drop.fit("fonts/SCB.TTF")
@@ -35,6 +39,7 @@ def generate_image(form):
             test.paste_object(drop)
 
     log_progress(form['identifier'])
+    test.render()
     test.img.save('static/tmp/'+form['identifier']+'.jpg')
 
     return {'concept':form['name'],'src':'/tmp/'+form['identifier']+'.jpg','caption':str(form)}
