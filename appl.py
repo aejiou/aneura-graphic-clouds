@@ -1,13 +1,16 @@
 import random
-
-from flask import Flask, request, render_template, jsonify, redirect, url_for, send_from_directory
-
 import time
-import werkzeug
 
 
-#with open('spam_model.pkl', 'rb') as f:
-#    model = pickle.load(f)
+from flask import Flask, request, jsonify, redirect, url_for
+
+import sys
+
+sys.path.append('gc/')
+
+from run import generate_image
+
+
 app = Flask(__name__, static_url_path="")
 
 @app.route('/')
@@ -29,10 +32,14 @@ def create():
     for each in elems:
         text += each + ' ' + str(request.form[each]) + "\n"
 
+    """
     di = {
         'concept':request.form['name'],
         'src':"tmp/{}.jpg".format(request.form['identifier']),
         'caption':'summary of settings'
         }
     time.sleep(5)
+    """
+    di = generate_image(request.form)
+
     return jsonify(di)
