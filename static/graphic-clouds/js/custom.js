@@ -49,7 +49,7 @@ function unique_id()
 function write_output(result)
  {
     $('#output').html("<h2>"+result.concept+"</h2>");
-    $('#output').append('    <img class="img-fluid d-block mx-auto" src="'+result.src+'" alt="">');
+    $('#output').append('    <img class="img-fluid" src="'+result.src+'" alt="">');
     $('#output').append('<p class="item-intro text-muted">'+result.caption+'</p>');
     $('#output').append('<button class="btn btn-primary" data-dismiss="modal" type="button"><i class="fas fa-times"></i>Close</button>');
  }

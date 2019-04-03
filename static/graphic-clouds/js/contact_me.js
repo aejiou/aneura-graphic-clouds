@@ -7,6 +7,7 @@ $(function() {
     },
     submitSuccess: function($form, event) {
       unique_id();
+      $('#output').html("");
       write_message('Information submitted! Starting...','success');
       my_data = sendStyle();
 
