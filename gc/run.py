@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def generate_image(form):
     def log_progress(id):
         nonlocal step
@@ -13,21 +14,23 @@ def generate_image(form):
         return w.upper()
     def lower(w):
         return w.lower()
-    def both(w):
-        if np.random.randint(0,2)==1:
-            return w.lower()
-        else:
-            return w.upper()
+    def cap(w):
+        return w[:1].upper()+w[1:].lower()
+    def rand(w):
+        t = [upper,lower,cap][np.random.randint(0,3)]
+        return t(w)
+
+    stages = [
+        'Creating all the objects',
+        'Mapping cycle 1','Mapping cycle 2','Mapping cycle 3','Cycle 4','Cycle 5',
+        'Cycle 6','Cycle 7','Cycle 8','Rendering the final image']
+    step = 1        
+    log_progress(form['identifier'])
 
     t_f = lambda x: True if x=='true' else False
 
     from src import Canvas, Droplet
 
-    stages = [
-        'Creating all the objects',
-        'Mapping cycle 1','Mapping cycle 2','Mapping cycle 3','Cycle 4','Cycle 5',
-        'Rendering the final image']
-    step = 1
 
     w, h = int(form['im_width']), int(form['im_height'])
 
@@ -42,14 +45,16 @@ def generate_image(form):
         inverter = 1
 
 
+    fontnames = [
+        'antiqua','ashbury','brochurn','cloistrk', 'cushing','distress','eklektic',
+        'geometr', 'hobo', 'lucian', 'motterfem', 'myriadpro', 'nuptial', 'pantspatrol',
+        'polaroid','raleigh']
 
-    fonts = np.array(['fonts/SCB.TTF','fonts/SCB.TTF','fonts/SCB.TTF','fonts/SCB.TTF'])
+    fonts = np.array(['fonts/'+name+'.ttf' for name in fontnames])
+    fonts[np.argwhere(fonts=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
     
-    fonts_to_use = [form['font1'],form['font2'],form['font3'],form['font4']]
-    fonts_to_use = [ t_f(x) for x in fonts_to_use]
+    fonts_to_use = [t_f(form[name]) for name in fontnames]
     fonts_to_use = fonts[fonts_to_use]
-
-    log_progress(form['identifier'])
 
     colors = {
         'bw': [(0,0,0),(255,255,255)],
@@ -69,14 +74,14 @@ def generate_image(form):
         'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
         'horses','cat','no','yes','forever','dark']
     
-    transform = {'upper':upper,'lower':lower,'both':both}    
+    transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
     drops = [Droplet(transform[form['transform']](word)) for word in words]
 
     for drop in drops:
         drop.fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
 
-    for _ in range(0,5):
+    for _ in range(0,8):
         log_progress(form['identifier'])
         for drop in drops:
             test.paste_object(drop)

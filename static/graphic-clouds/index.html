@@ -253,20 +253,16 @@ function dispP(n) {
                   </div>
                   <div class="timeline-panel">
                     <div class="timeline-heading">
-                      <h4 class="text-uppercase">Font Style</h4>
-                      <h4 class="subheading">Choose the fonts to be used and&nbsp;the&nbsp;text&nbsp;transformation.</h4>
+                      <h4 class="text-uppercase">Fonts</h4>
+                      <h4 class="subheading">Choose your fonts and the&nbsp;text&nbsp;transformation.</h4>
                     </div>
                     <div class="timeline-body">
-                      <p class="text-muted">
-                        <input class="form-radio" id="font1" name="font1" checked type="checkbox">Font 1<br>
-                        <input class="form-radio" id="font2" name="font2" type="checkbox">Font 2<br>
-                        <input class="form-radio" id="font3" name="font3" type="checkbox">Font 3<br>
-                        <input class="form-radio" id="font4" name="font4" type="checkbox">Font 4<br>
-                      </p>
-                      <p class="text-muted">
-                          <input class="form-radio" id="transform" name="transform" type="radio" checked onClick="imToggle('il_font','4_1');" value="upper">UPPER
-                          <input class="form-radio" id="transform" name="transform" type="radio" onClick="imToggle('il_font','4_2');" value="lower">lower
-                          <input class="form-radio" id="transform" name="transform" type="radio" onClick="imToggle('il_font','4_3');" value="both">MIX&nbsp;both
+                      <p class="text-muted" id="font-selection"></p><script>writeFonts();</script>
+                      <p class="text-muted" style="margin-top:15px;">
+                          <input class="form-radio" id="transform" name="transform" type="radio" onClick="fontsToggle('_u');" value="upper">UPPERCASE
+                          <input class="form-radio" id="transform" name="transform" type="radio" onClick="fontsToggle('_l');" value="lower">lowercase<br>
+                          <input class="form-radio" id="transform" name="transform" type="radio" checked onClick="fontsToggle('');" value="cap">Capitalize
+                          <input class="form-radio" id="transform" name="transform" type="radio" onClick="fontsToggle('random');" value="rand">Random
                       </p>
                     </div>
                   </div>

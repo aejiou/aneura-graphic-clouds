@@ -3,10 +3,36 @@ function imToggle(im,src)
   document.getElementById(im).src = "img/about/"+src+".jpg";
 }
 
+function fontsToggle(add){
+  var adds = ['_l','_u',''];
+  ext = add; 
+ for (i=0; i<fonts.length; i++)
+ {
+   if (add == 'random') {ext = adds[Math.round(Math.random()*2)];}
+   document.getElementById('fontimg'+i).src = "img/fonts/"+fonts[i]+ext+".gif";
+ } 
+}
+
+function writeFonts(){
+  fonts = ['antiqua','ashbury','brochurn','cloistrk', 'cushing','distress','eklektic',
+ 'geometr', 'hobo', 'lucian', 'motterfem', 'myriadpro', 'nuptial', 'pantspatrol', 'polaroid',
+ 'raleigh'];
+  var html = "";
+  for (i=0; i<fonts.length; i++)
+  {
+   html = html + '<input class="form-radio" id="'+fonts[i]+'" name="'+fonts[i]+ '"' + ( (i==0) ? ' checked' : '')+' type="checkbox"><img src=img/fonts/'+fonts[i]+'.gif id="fontimg'+i+'" width="122">';
+   html = html + ((i/2 == Math.round(i/2)) ? "" : "<br>");
+  }
+  $('#font-selection').html(html);
+ 
+
+}
+
 function sendStyle()
 {
     var elems = ['identifier','name','mask','engine','t_im_range','transform','colors','im_width','im_height'];
-    var checkboxes = ['font1','font2','font3','font4','inverted'];
+    var checkboxes = fonts;
+    checkboxes[checkboxes.length] = 'inverted';
     var dt = "var data = { ";
     for (i=0; i<elems.length; i++)
      {
@@ -18,6 +44,7 @@ function sendStyle()
      }
     dt = dt + " }";
     d = eval(dt);
+    fonts.pop();
     return data;
 
 }

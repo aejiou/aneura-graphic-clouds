@@ -24,13 +24,15 @@ def gc():
 
 @app.route('/clouds-submit', methods=['POST'])
 def create():
-    elems = [
-        'identifier','name','engine','t_im_range','transform','colors',
-        'im_width','im_height','font1','font2','font3','font4','inverted'
-        ]
-    text = ""
-    for each in elems:
-        text += each + ' ' + str(request.form[each]) + "\n"
+    #elems = [
+    #    'identifier','name','engine','t_im_range','transform','colors',
+    #    'im_width','im_height', ,'inverted'
+    #    ]
+    #text = ""
+    #for each in elems:
+    #    text += each + ' ' + str(request.form[each]) + "\n"
+
+    #return '123'
 
     di = generate_image(request.form)
 
