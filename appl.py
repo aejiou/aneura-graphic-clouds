@@ -32,14 +32,6 @@ def create():
     for each in elems:
         text += each + ' ' + str(request.form[each]) + "\n"
 
-    """
-    di = {
-        'concept':request.form['name'],
-        'src':"tmp/{}.jpg".format(request.form['identifier']),
-        'caption':'summary of settings'
-        }
-    time.sleep(5)
-    """
     di = generate_image(request.form)
 
     os.remove('static/tmp/'+request.form['identifier']+'.log')

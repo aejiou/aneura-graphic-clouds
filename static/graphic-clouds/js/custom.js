@@ -5,12 +5,12 @@ function imToggle(im,src)
 
 function sendStyle()
 {
-    var elems = ['identifier','name','engine','t_im_range','transform','colors','im_width','im_height'];
+    var elems = ['identifier','name','mask','engine','t_im_range','transform','colors','im_width','im_height'];
     var checkboxes = ['font1','font2','font3','font4','inverted'];
     var dt = "var data = { ";
     for (i=0; i<elems.length; i++)
      {
-         dt = dt + '"' + elems[i] + '" : "' + document.getElementById(elems[i]).value + '"' + ' , ';
+         dt = dt + '"' + elems[i] + '" : "' + document.forms[0][elems[i]].value + '"' + ' , ';
      }
     for (i=0; i<checkboxes.length; i++)
      {
