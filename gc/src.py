@@ -66,12 +66,12 @@ class Canvas:
                                          word)
             font = ImageFont.truetype(fontfile,size)
             self.dmask.text((x+m_margins[0], y+m_margins[1]),word,255,font=font)
-            self.queue.append({'src':font,'args':[(x+m_margins[0], y+m_margins[1]),word,255]})
+            self.queue.append({'src':'font','args':[fontfile]})
         else:
             im = Image.open(filemask).convert('L').resize(self.mask.size, Image.ANTIALIAS)
             self.mask.paste(im,(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2)))
-            self.queue.append({'src':im,
-                               'args':[(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2))]})
+            self.queue.append({'src':'image',
+                               'args':[filemask]})
             
         if invert:
             self.mask = ImageOps.invert(self.mask)
@@ -167,6 +167,19 @@ class Canvas:
                 x, y = element['args']['pos'][0], element['args']['pos'][1]
                 img = img.resize((w,h), Image.ANTIALIAS)
                 self.img.paste(img,(x,y))
+            elif element['src']=='font':
+                if self.invert==False:
+                    (x, y), size = find_fontsize(
+                        self.w-(self.margins[0]+self.margins[2]),
+                        self.h-(self.margins[1]+self.margins[3]),
+                        element['args'][0],self.word)
+                    font = ImageFont.truetype(element['args'][0],size)
+                    self.draw.text(
+                        (x+self.margins[0], y+self.margins[1]),self.word,
+                        self.cmap[0],font=font)
+
+
+
 
 
 class Droplet:

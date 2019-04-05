@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from collections import Counter
 
-def get_words(query):
+def get_words(query,id):
     def get_links(query,where='google'):
         def parse_url(url):
             replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
@@ -30,14 +30,17 @@ def get_words(query):
         
     def get_soups(links):
         soups = []
-        responces = []
+        #responces = []
         for link in links:
-            print(link)
-            response = requests.get(link)
-            if response.status_code==200:
-                responces.append(response.text)
-                soups.append(BeautifulSoup(responces[-1], 'html.parser'))
-        return soups, responces
+            if link[0:4]=='http':
+                try:
+                    response = requests.get(link.replace('https','http'),verify=False)
+                    if response.status_code==200:
+                        #responces.append(response.text)
+                        soups.append(BeautifulSoup(response.text, 'html.parser'))
+                except:
+                    pass
+        return soups #, responces
 
     def cook_soup(s):
         text = ""
@@ -62,11 +65,18 @@ def get_words(query):
         result = "".join([ char if char not in '0123456789/\:,.;-!?&()#"%[»]—' else ' ' for char in result ])
         return result
 
+    from run import log_progress
+
     links = get_links(query)
-    soups, responces = get_soups(links)
+    log_progress(id)
+
+    
+    soups = get_soups(links)
     contents = []
     for each in soups:
         contents.append(clean_text(cook_soup(each)))
+
+    log_progress(id)
 
     total_count = Counter([
         word.lower() for word in " ".join(contents).split(" ") 
@@ -74,7 +84,7 @@ def get_words(query):
 
     words_in_order = [ 
         each[0] for each in total_count.most_common(len(total_count)) 
-        if each[0] !=query]
+        if each[0] !=query.lower()]
 
     return words_in_order
 
