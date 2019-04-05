@@ -157,7 +157,7 @@ class Canvas:
         return maxrad
         
     def render(self):
-        for element in self.queue:
+        for element in self.queue[1:]:
             if isinstance(element['src'],Droplet):
                 r_color = np.random.randint(0,len(self.cmap)-1)
                 img = element['src'].render((self.cmap[r_color],self.cmap[-1]))
@@ -167,16 +167,17 @@ class Canvas:
                 x, y = element['args']['pos'][0], element['args']['pos'][1]
                 img = img.resize((w,h), Image.ANTIALIAS)
                 self.img.paste(img,(x,y))
-            elif element['src']=='font':
-                if self.invert==False:
-                    (x, y), size = find_fontsize(
-                        self.w-(self.margins[0]+self.margins[2]),
-                        self.h-(self.margins[1]+self.margins[3]),
-                        element['args'][0],self.word)
-                    font = ImageFont.truetype(element['args'][0],size)
-                    self.draw.text(
-                        (x+self.margins[0], y+self.margins[1]),self.word,
-                        self.cmap[0],font=font)
+
+        if self.queue[0]['src']=='font':
+            if self.invert==False:
+                (x, y), size = find_fontsize(
+                    self.w-(self.margins[0]+self.margins[2]),
+                    self.h-(self.margins[1]+self.margins[3]),
+                    self.queue[0]['args'][0],self.word)
+                font = ImageFont.truetype(self.queue[0]['args'][0],size)
+                self.draw.text(
+                    (x+self.margins[0], y+self.margins[1]),self.word,
+                    self.cmap[0],font=font)
 
 
 

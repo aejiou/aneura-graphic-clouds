@@ -3,6 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from collections import Counter
+import threading 
+
+soups = []
 
 def get_words(query,id):
     def get_links(query,where='google'):
@@ -41,6 +44,12 @@ def get_words(query,id):
                 except:
                     pass
         return soups #, responces
+    
+    def get_soup(link,num):
+        response = requests.get(link.replace("https","http"), verify=False)
+        if response.status_code==200:
+            global soups
+            soups[num] = BeautifulSoup(response.text, 'html.parser')
 
     def cook_soup(s):
         text = ""
@@ -61,26 +70,42 @@ def get_words(query,id):
         return ""
 
     def clean_text(t):
-        result = t.replace("\n","")
+        result = t.replace("\n","").lower()
         result = "".join([ char if char not in '0123456789/\:,.;-!?&()#"%[»]—' else ' ' for char in result ])
         return result
 
     from run import log_progress
-
+    
     links = get_links(query)
+    
+    global soups
+    soups = []
+    threads = []
+
+    log_progress(id)
+    
+    for ind,each in enumerate(links):
+        soups.append("")
+        threads.append(threading.Thread(target=get_soup, args=([each,ind])))
+
+    for num in range(0,len(threads)):
+        threads[num].start()
+                   
+    for num in range(0,len(threads)):
+        threads[num].join()
+
+    #soups = get_soups(links)
+
+    contents = []
+
     log_progress(id)
 
-    
-    soups = get_soups(links)
-    contents = []
     for each in soups:
         contents.append(clean_text(cook_soup(each)))
 
-    log_progress(id)
-
     total_count = Counter([
-        word.lower() for word in " ".join(contents).split(" ") 
-        if word!='' and word.lower() not in set(stopwords.words('english'))])
+        word for word in " ".join(contents).split(" ")
+        if word!='' and word not in set(stopwords.words('english'))])
 
     words_in_order = [ 
         each[0] for each in total_count.most_common(len(total_count)) 

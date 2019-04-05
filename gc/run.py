@@ -35,7 +35,8 @@ def generate_image(form):
         return t(w)
 
     global stages 
-    global step        
+    global step   
+    step = 0     
 
     log_progress(form['identifier'])
 
