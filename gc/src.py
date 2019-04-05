@@ -142,6 +142,10 @@ class Canvas:
         x, y = maxcenter[1]-maxrad*ratio[0]+1, maxcenter[0]-maxrad*ratio[1]+1
         w, h = floor(w), floor(h)
         x, y = ceil(x), ceil(y)
+
+        if min(w,h) == 0:
+            return 0
+
         self.queue.append({'src':obj,'args':{'size':(w*self.reduce,h*self.reduce),
                                              'pos':(x*self.reduce,y*self.reduce), 
                                              'rotate':rotate}})
@@ -150,6 +154,7 @@ class Canvas:
         self.th_mat[y:y+img.size[1],x:x+img.size[0]] = self._threshold_matrix(img)
         self.mask.paste(img,(x,y))
         self.th_mat = self._threshold_matrix(self.mask)
+        return maxrad
         
     def render(self):
         for element in self.queue:

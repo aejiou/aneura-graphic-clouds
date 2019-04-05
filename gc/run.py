@@ -1,7 +1,14 @@
 import numpy as np
+from itertools import cycle
 
 
 def generate_image(form):
+    def color_gradient(one,two,steps=10):
+        r = np.linspace(one[0],two[0],steps).astype(int)
+        g = np.linspace(one[1],two[1],steps).astype(int)
+        b = np.linspace(one[2],two[2],steps).astype(int)
+        return [ (one,two,three) for one, two, three in zip(r,g,b) ]
+    
     def log_progress(id):
         nonlocal step
         nonlocal stages
@@ -30,6 +37,7 @@ def generate_image(form):
     t_f = lambda x: True if x=='true' else False
 
     from src import Canvas, Droplet
+    from crawl import get_words
 
 
     w, h = int(form['im_width']), int(form['im_height'])
@@ -56,35 +64,54 @@ def generate_image(form):
     fonts_to_use = [t_f(form[name]) for name in fontnames]
     fonts_to_use = fonts[fonts_to_use]
 
+    rainbow = (
+        color_gradient((148, 0, 211),(75, 0, 130))[:-1] + 
+        color_gradient((75, 0, 130),(0, 0, 255))[:-1] + 
+        color_gradient((0, 0, 255),(0, 255, 0))[:-1] + 
+        color_gradient((0, 255, 0),(255, 255, 0),4)[:-1] + 
+        color_gradient((255, 255, 0),(255, 127, 0))[:-1] + 
+        color_gradient((255, 127, 0),(255, 0 , 0))[:-1] + 
+        color_gradient((255, 0 , 0),(148, 0, 211))[:-1])
+    
+    r = np.random.randint(0,len(rainbow))
+
+    rainbow = rainbow[r:] + rainbow[:r]
+    rainbow = [tuple((np.array(rainbow[0])/2).astype(int))] + rainbow
+    if inverter==-1:
+        rainbow = [tuple((np.array(rainbow[0])/2).astype(int))] + rainbow
+    else:
+        rainbow = rainbow + [(255,255,255)]
+
     colors = {
         'bw': [(0,0,0),(255,255,255)],
-        'gray': [ 
-            tuple(np.vstack([np.zeros(3),(np.zeros(3) + 
-            np.arange(60+50*inverter,200+50*inverter,5)[:, None])])[num].astype(int))
-            for num in range(0,28) ],
-        'rainbow': [
-            (75, 0, 130),(148, 0, 211),(0, 0, 255),(0, 255, 0),
-            (255, 255, 0),(255, 127, 0),(255, 0 , 0),(255,255,255)]
+        'gray': [(70,70,70)] + color_gradient((100,100,100),(200,200,200),11) + [(230,230,230)],
+        'rainbow': rainbow
     }
 
     test = Canvas(w,h,colors[form['colors']][::inverter],round(w/reducer))
     test.fit(form['name'],"fonts/SCB.TTF",invert=t_f(form['mask']))
 
-    words = [
-        'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
-        'horses','cat','no','yes','forever','dark']
+    #words = [
+    #    'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
+    #    'horses','cat','no','yes','forever','dark']
+
+    words = get_words(form['name'])
     
     transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
-    drops = [Droplet(transform[form['transform']](word)) for word in words]
+    drops = []
 
-    for drop in drops:
-        drop.fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
+    for ind,word in enumerate(cycle(words)):
+        drops.append(Droplet(transform[form['transform']](word)))
+        drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
+        if test.paste_object(drops[-1])<10:
+            break
+       
 
-    for _ in range(0,8):
-        log_progress(form['identifier'])
-        for drop in drops:
-            test.paste_object(drop)
+    #for _ in range(0,8):
+    #    log_progress(form['identifier'])
+    #    for drop in drops:
+            
 
     log_progress(form['identifier'])
     test.render()
