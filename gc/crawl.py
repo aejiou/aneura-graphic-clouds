@@ -7,7 +7,7 @@ import threading
 
 soups = []
 
-def get_words(query,id):
+def get_words(query,id,clarify):
     def get_links(query,where='google'):
         def parse_url(url):
             replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
@@ -37,7 +37,7 @@ def get_words(query,id):
         for link in links:
             if link[0:4]=='http':
                 try:
-                    response = requests.get(link.replace('https','http'),verify=False)
+                    response = requests.get(link.replace('https','http'),verify=False,timeout=5)
                     if response.status_code==200:
                         #responces.append(response.text)
                         soups.append(BeautifulSoup(response.text, 'html.parser'))
@@ -46,13 +46,16 @@ def get_words(query,id):
         return soups #, responces
     
     def get_soup(link,num):
-        response = requests.get(link.replace("https","http"), verify=False)
+        response = requests.get(link.replace("https","http"), verify=False,timeout=5)
         if response.status_code==200:
             global soups
             soups[num] = BeautifulSoup(response.text, 'html.parser')
 
     def cook_soup(s):
         text = ""
+
+        if s==None:
+            return ""
 
         for each in s.find_all(['p','blockquote']):
             text += each.get_text()
@@ -76,7 +79,7 @@ def get_words(query,id):
 
     from run import log_progress
     
-    links = get_links(query)
+    links = get_links(query+' '+clarify)
     
     global soups
     soups = []
@@ -85,7 +88,7 @@ def get_words(query,id):
     log_progress(id)
     
     for ind,each in enumerate(links):
-        soups.append("")
+        soups.append(None)
         threads.append(threading.Thread(target=get_soup, args=([each,ind])))
 
     for num in range(0,len(threads)):

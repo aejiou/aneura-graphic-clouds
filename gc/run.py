@@ -86,7 +86,7 @@ def generate_image(form):
 
     colors = {
         'bw': [(0,0,0),(255,255,255)],
-        'gray': [(20,20,20)] + color_gradient((100,100,100),(200,200,200),11) + [(230,230,230)],
+        'gray': [(50,50,50)] + color_gradient((100,100,100),(170,170,170),11) + [(220,220,220)],
         'rainbow': rainbow
     }
 
@@ -97,7 +97,7 @@ def generate_image(form):
     #    'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
     #    'horses','cat','no','yes','forever','dark']
 
-    words = get_words(form['name'],form['identifier'])
+    words = get_words(form['name'],form['identifier'],form['keywords'])
     
     transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
@@ -105,6 +105,8 @@ def generate_image(form):
 
     for num,word in enumerate(words):
         if np.random.randint(0,4)==2:
+            if num<2:
+                num = 2
             c = str(num) + ' words placed'
             log_progress(form['identifier'],message="Mapping... "+c)
         drops.append(Droplet(transform[form['transform']](word)))

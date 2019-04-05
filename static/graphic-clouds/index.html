@@ -180,15 +180,16 @@
               <div class="timeline-panel" style="margin-bottom:-60px;">
                 <div class="timeline-heading">
                   <h4 class="text-uppercase">Central Concept</h4>
-                  <h4>Any one word to be the&nbsp;base for&nbsp;the&nbsp;image.</h4>
+                  <h4>A base word and optional keywords&nbsp;to&nbsp;clarify&nbsp;it.</h4>
                 </div>
                 <div class="timeline-body">
                     <div class="form-group">
-                        <input class="form-control" id="name" type="text" value="love" placeholder="Word *" required="required" data-validation-required-message="Please choose the central concept.">
+                        <input class="form-control" id="name" type="text" value="" placeholder="Word *" required="required" data-validation-required-message="Please choose the central concept.">
                         <p class="help-block text-danger" style="text-align: left;"></p>
+                        <input class="form-control" id="keywords" type="text" value="" placeholder="Clarifying keywords" style="margin-top:-5px; margin-bottom:10px;">
                         <p class="text-muted" style="text-align:left;">
-                          <input class="form-radio" id="mask" name="mask" type="radio" checked onClick="imToggle('il1','1_2');" value="false">Arrange outside
-                          <input class="form-radio" id="mask" name="mask" type="radio" onClick="imToggle('il1','1_1');" value="true">Arrange inside
+                          <input class="form-radio" id="mask" name="mask" type="radio" checked onClick="imToggle('il1','1_2');" value="false">Map outside
+                          <input class="form-radio" id="mask" name="mask" type="radio" onClick="imToggle('il1','1_1');" value="true">Map inside
                         </p>
                     </div>      
                 </div>
