@@ -4,7 +4,6 @@ from PIL import ImageFont
 from PIL import ImageDraw
 
 import numpy as np
-import pandas as pd
 
 from math import floor, ceil
 

@@ -1,7 +1,3 @@
-import random
-import time
-
-
 from flask import Flask, request, jsonify, redirect, url_for
 
 import sys
@@ -13,6 +9,7 @@ from run import generate_image
 
 
 app = Flask(__name__, static_url_path="")
+application = app
 
 @app.route('/')
 def index():
@@ -48,4 +45,8 @@ def update():
     with open("static/tmp/"+request.args.get('id')+".log") as f:
         for line in f:
             return line
+
+if __name__ == "__main__":
+    app.run()
+
 
