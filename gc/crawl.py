@@ -5,12 +5,15 @@ from nltk.corpus import stopwords
 from collections import Counter
 import threading 
 
+from PIL import Image
+from sklearn.cluster import k_means
+
 soups = []
 
 def get_words(query,id,clarify):
     def get_links(query,where='google'):
         def parse_url(url):
-            replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
+            replaces = { '%3F':'?','%3D':'=','%2520':'%20','&amp;':"&"}
             for key, value in replaces.items():
                 url = url.replace(key,value)
             return url
@@ -22,14 +25,42 @@ def get_words(query,id,clarify):
         if where == 'google':
             links = [ each.split('&amp')[0] for each in res.split('/url?q=')[1:] ]
             links = [parse_url(link) for link in links if link.count('webcache.googleusercontent.com')==0]
+            images_link = res.split("/search?q=")[1:]
+            images_link = [ each.split('">Images')[0] for each in images_link]
+            im_l = parse_url(images_link[np.argmin([len(each) for each in images_link])])
+            im_l = 'https://google.com/search?q=' + im_l
             
-        return list(set(links))
+        return list(set(links)), im_l
 
-    def parse_url(url):
-        replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
-        for key, value in replaces.items():
-            url = url.replace(key,value)
-        return url
+    def get_images(link,num=10):
+        res = requests.get(link)
+        im_res = res.text
+        im_soup = BeautifulSoup(im_res, 'html.parser')
+        srcs = [ each['src'] for each in im_soup.find_all('img')][0:num]
+        imgs = [Image.open(requests.get(each, stream=True).raw) for each in srcs]
+        return imgs
+
+    def get_cumulative_palette(imgs):
+        big_pal = []
+        for image in imgs:
+            tmp = image.convert('P', palette = Image.PERSPECTIVE, colors=256)
+            tmp = np.array(tmp.convert('RGB'))
+            c = k_means(tmp.reshape(tmp.shape[0]*tmp.shape[1],3),16)
+            palette = np.round(c[0]).astype(int)
+            big_pal.append(palette)
+    
+        c = k_means(np.vstack(big_pal),10)
+        final_palette = np.round(c[0]).astype(int)
+        indxs = np.argsort(np.sum(final_palette,axis=1))
+        cmap = [ tuple(each) for each in final_palette[indxs] ]
+    
+        return cmap
+
+#    def parse_url(url):
+#        replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
+#        for key, value in replaces.items():
+#            url = url.replace(key,value)
+#        return url
         
     def get_soups(links):
         soups = []
@@ -79,7 +110,7 @@ def get_words(query,id,clarify):
 
     from run import log_progress
     
-    links = get_links(query+' '+clarify)
+    links, images_link = get_links(query+' '+clarify)
     
     global soups
     soups = []
@@ -114,7 +145,14 @@ def get_words(query,id,clarify):
         each[0] for each in total_count.most_common(len(total_count)) 
         if each[0] !=query.lower()]
 
-    return words_in_order
+    #log progress start on images
+    log_progress(id)
+
+    imgs = get_images(images_link)
+
+    cmap = get_cumulative_palette(imgs)
+
+    return words_in_order, cmap
 
     
 

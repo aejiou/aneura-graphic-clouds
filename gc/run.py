@@ -3,7 +3,7 @@ from itertools import cycle
 
 stages = [
     'Getting the links from search engine','Getting content from each of the links',
-    'Counting words','Mapping','Rendering the final image']
+    'Counting words','Getting color palette','Mapping','Rendering the final image']
 step = 0
 
 def log_progress(id,message=None):
@@ -13,7 +13,7 @@ def log_progress(id,message=None):
     if message==None:
         message = stages[step]
         step += 1
-    f.write("Step {} of {}: {}...".format(step,len(stages),message))
+    f.write("Step {} of {}: {}...".format(step+1,len(stages),message))
     f.close()
 
 
@@ -90,16 +90,20 @@ def generate_image(form):
         'rainbow': rainbow
     }
 
-    image = Canvas(w,h,colors[form['colors']][::inverter],round(w/reducer))
-    image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
+    #image = Canvas(w,h,colors[form['colors']][::inverter],round(w/reducer))
+    #image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
 
     #words = [
     #    'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
     #    'horses','cat','no','yes','forever','dark']
 
-    words = get_words(form['name'],form['identifier'],form['keywords'])
+    words, cmap = get_words(form['name'],form['identifier'],form['keywords'])
     
     transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
+
+    image = Canvas(w,h,cmap[::inverter],round(w/reducer))
+    image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
+
 
     drops = []
 
