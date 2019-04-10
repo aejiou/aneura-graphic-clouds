@@ -107,7 +107,7 @@ def get_words(query,id,clarify):
 
     def clean_text(t):
         result = t.replace("\n","").lower()
-        result = "".join([ char if char in '-+#abcdefghijklmnopqrstuvwxyz%' else ' ' for char in result ])
+        result = "".join([ char if char in '-+#1234567890abcdefghijklmnopqrstuvwxyz' else ' ' for char in result ])
         return result
 
     from run import log_progress
@@ -139,7 +139,7 @@ def get_words(query,id,clarify):
 
     total_count = Counter([
         word for word in " ".join(contents).split(" ")
-        if word!='' and word not in set(stopwords.words('english'))])
+        if len(word)>1 and word not in set(stopwords.words('english'))])
 
     words_in_order = [ 
         each[0] for each in total_count.most_common(len(total_count)) 

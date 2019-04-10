@@ -51,7 +51,7 @@ def generate_image(form):
     w, h = int(form['im_width']), int(form['im_height'])
 
     if t_f(form['mask']): 
-        reducer = 1000 
+        reducer = 1000
     else:
         reducer = 500
 
@@ -60,23 +60,30 @@ def generate_image(form):
     else:
         inverter = 1
 
+    styles = {
+        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['raleigh'], 'transform': [cap] },
+        'minimal' : { 'fonts': [ 'geometr', 'myriadpro'],'invert':[ 'geometr', 'myriadpro'],'transform':[upper]},
+        'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
+    }
+
+    style = styles[form['style']]
 
     fontnames = [
         'antiqua','ashbury','brochurn','cloistrk', 'cushing','distress','eklektic',
         'geometr', 'hobo', 'lucian', 'motterfem', 'myriadpro', 'nuptial', 'pantspatrol',
         'polaroid','raleigh']
 
-    fonts = np.array(['fonts/'+name+'.ttf' for name in fontnames])
-    fonts[np.argwhere(fonts=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
+    fonts_to_use = np.array(['fonts/'+name+'.ttf' for name in style['fonts']])
+    fonts_to_use[np.argwhere(fonts_to_use=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
     
-    fonts_to_use = [t_f(form[name]) for name in fontnames]
-    fonts_to_use = fonts[fonts_to_use]
+    #fonts_to_use = [t_f(form[name]) for name in fontnames]
+    #fonts_to_use = fonts[fonts_to_use]
 
     words, cmap = get_words(form['name'],form['identifier'],form['keywords'])
 
     log_progress(form['identifier'])
     
-    transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
+    #transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
     color_bins = np.array([[0,0,0],[255,255,255],[255,0,0],[0,255,0],[0,0,255],[255,0,255],[0,255,255],[255,255,0]])
     key_colors = k_means(cmap,8,init=color_bins)
@@ -94,9 +101,14 @@ def generate_image(form):
     #fin_cmap[np.sum(fin_cmap-fin_cmap[0],axis=1)<120] -= inverter*33
     fin_cmap = [ tuple(each) for each in fin_cmap ]
 
+    if t_f(form['mask']):
+        fonts_header = ['fonts/'+name+'.ttf' for name in style['invert']]
+    else:
+        fonts_header = fonts_to_use
+
 
     image = Canvas(w,h,fin_cmap,round(w/reducer))
-    image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
+    image.fit(form['name'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
 
     drops = []
@@ -107,7 +119,8 @@ def generate_image(form):
                 num = 2
             c = str(num) + ' words placed'
             log_progress(form['identifier'],message="Mapping... "+c)
-        drops.append(Droplet(transform[form['transform']](word)))
+        tr = style['transform'][np.random.randint(0,len(style['transform']))]
+        drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
         if image.paste_object(drops[-1])<7:
             log_progress(form['identifier'],message="No more free space! Finishing")

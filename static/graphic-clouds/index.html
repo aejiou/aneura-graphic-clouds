@@ -195,6 +195,7 @@
                 </div>
               </div>
             </li>
+<!--
             <li class="timeline-inverted">
               <div class="timeline-image">
                 <img class="rounded-circle img-fluid" src="img/about/2_0.jpg" alt="" id="range_img" name="range_img">
@@ -217,8 +218,9 @@
                       <p class="text-muted" style="margin-top:20px;">
                         <input type="text" class="js-range-slider" id="t_im_range" name="t_im_range" value="" />
                       </p>
-
+-->
 <!-- ION Slider -->
+<!--
 <script>
 function dispP(n) {
         var one = (100-n) ? ( (n==0) ? "100% text" : n + "% images" ) + "" : "";
@@ -255,7 +257,7 @@ function dispP(n) {
                   <div class="timeline-panel">
                     <div class="timeline-heading">
                       <h4 class="text-uppercase">Fonts to use</h4>
-                      <!-- h4 class="subheading">Choose your fonts and the&nbsp;text&nbsp;transformation.</h4-->
+                      <h4 class="subheading">Choose your fonts and the&nbsp;text&nbsp;transformation.</h4>
                     </div>
                     <div class="timeline-body">
                       <p class="text-muted" id="font-selection"></p><script>writeFonts();</script>
@@ -268,6 +270,7 @@ function dispP(n) {
                     </div>
                   </div>
             </li>
+
             <li class="timeline-inverted">
                 <div class="timeline-image" style="margin-bottom:-60px;">
                     <img class="rounded-circle img-fluid" src="img/about/3_1.jpg" alt="" id="il_color">
@@ -289,7 +292,31 @@ function dispP(n) {
                     </div>
                   </div>
               </li>
-  
+              -->
+            <li class="timeline-inverted">
+                <div class="timeline-image" style="margin-bottom:-60px;">
+                    <img class="rounded-circle img-fluid" src="img/about/3_1.jpg" alt="" id="il_color">
+                  </div>
+                  <div class="timeline-panel">
+                    <div class="timeline-heading">
+                      <h4 class="text-uppercase">Image style</h4>
+                      <h4 class="subheading">Choose the look for your&nbsp;final&nbsp;artwork.</h4>
+                    </div>
+                    <div class="timeline-body">
+                        <p class="text-muted">
+                            <input class="form-radio" id="style" name="style" type="radio" checked onClick="imToggle('il_color','3_1');" value="minimal">Minimal<br>
+                            <input class="form-radio" id="style" name="style" type="radio" onClick="imToggle('il_color','3_2');" value="classic">Classic<br>
+                            <input class="form-radio" id="style" name="style" type="radio" onClick="imToggle('il_color','3_3');" value="grunge">Grunge<br>
+                        </p>
+                        <p class="text-muted">
+                            <input class="form-radio" id="inverted" name="inverted" checked type="checkbox" onClick="imToggle('il_color','3_1');">Dark background
+                        </p>
+                    </div>
+                  </div>
+              </li>
+
+
+
             <li style="margin-bottom:20px;">
               <div class="timeline-image">
                 <img class="rounded-circle img-fluid" src="img/about/4.jpg" alt="">

@@ -140,8 +140,11 @@ class Canvas:
         w, h = floor(w), floor(h)
         x, y = ceil(x), ceil(y)
 
-        if min(w,h) == 0:
-            return 0
+        if min(w,h)<0.5:
+            if max(w,h)>7:
+                return 10
+            else:
+                return 0
 
         self.queue.append({'src':obj,'args':{'size':(w*self.reduce,h*self.reduce),
                                              'pos':(x*self.reduce,y*self.reduce), 
@@ -177,13 +180,15 @@ class Canvas:
                     self.cmap[0],font=font)
 
     def alpha_effect(self):
-        bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(20)))
+        bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(5*self.reduce)))
         img_alpha = np.array(self.img.convert("RGBA"))
         img_alpha[:,:,3] = bmf
         new_alpha = Image.fromarray(img_alpha)
         result = Image.new("RGBA",self.img.size,(*self.cmap[-1],255))
         result.alpha_composite(new_alpha)
         result.alpha_composite(new_alpha)
+        if self.invert:
+            result.alpha_composite(new_alpha)
         return result
 
 

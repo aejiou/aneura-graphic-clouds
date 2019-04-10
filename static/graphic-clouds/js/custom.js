@@ -30,9 +30,9 @@ function writeFonts(){
 
 function sendStyle()
 {
-    var elems = ['identifier','name','keywords','mask','engine','t_im_range','transform','colors','im_width','im_height'];
-    var checkboxes = fonts;
-    checkboxes[checkboxes.length] = 'inverted';
+    var elems = ['identifier','name','keywords','mask','style','im_width','im_height'];
+    var checkboxes = ['inverted'];
+    //checkboxes[checkboxes.length] = 'inverted';
     var dt = "var data = { ";
     for (i=0; i<elems.length; i++)
      {
@@ -44,7 +44,7 @@ function sendStyle()
      }
     dt = dt + " }";
     d = eval(dt);
-    fonts.pop();
+    //fonts.pop();
     return data;
 
 }
