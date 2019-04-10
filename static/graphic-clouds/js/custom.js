@@ -1,6 +1,13 @@
 function imToggle(im,src)
 {
-  document.getElementById(im).src = "img/about/"+src+".jpg";
+  var res;
+  if (im=='il_style') { 
+    if (src=='d_l') { src = document.forms[0].elements['style'].value; }
+    d_l = (document.getElementById('inverted').checked) ? '_dark' : "_light"; 
+    res = src + d_l; 
+  } 
+  else { res = src; }
+  document.getElementById(im).src = "img/about/"+ res +".jpg";
 }
 
 function fontsToggle(add){
