@@ -4,6 +4,7 @@ $(function() {
     preventSubmit: true,
     submitError: function($form, event, errors) {
       // additional error messages or events
+      write_message("Invalid input, please check all the fields.","danger");
     },
     submitSuccess: function($form, event) {
       unique_id();
@@ -37,7 +38,7 @@ $(function() {
         },
         error: function() {
           // Fail message
-          write_message('Sorry, something is wrong with the server. Please try again later!','danger');
+          write_message("Sorry, there's an error. Please try something else!","danger");
           //clear all fields
           //$('#contactForm').trigger("reset");
         },

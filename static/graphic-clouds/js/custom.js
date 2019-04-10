@@ -37,7 +37,7 @@ function writeFonts(){
 
 function sendStyle()
 {
-    var elems = ['identifier','name','keywords','mask','style','im_width','im_height'];
+    var elems = ['identifier','concept','keywords','mask','style','im_width','im_height'];
     var checkboxes = ['inverted'];
     //checkboxes[checkboxes.length] = 'inverted';
     var dt = "var data = { ";

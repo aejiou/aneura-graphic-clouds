@@ -248,7 +248,7 @@
                 </div>
                 <div class="timeline-body">
                     <div class="form-group">
-                        <input class="form-control" id="name" type="text" value="" placeholder="Word *" required="required" data-validation-required-message="Please choose the central concept.">
+                        <input class="form-control" id="concept" type="text" value="" placeholder="Word *" required="required" data-validation-required-message="Please choose the central concept.">
                         <p class="help-block text-danger" style="text-align: left;"></p>
                         <input class="form-control" id="keywords" type="text" value="" placeholder="Clarifying keywords" style="margin-top:-5px; margin-bottom:10px;">
                         <p class="text-muted" style="text-align:left;">
@@ -393,12 +393,12 @@ function dispP(n) {
                 <div class="timeline-body" style="margin-top:20px;">
                   <div class="form-group">
                     <div style="display: inline-block;">
-                      <input  style="width:100px;" class="form-control" id="im_width" type="text" placeholder="width *" required="required" data-validation-required-message="Need image width."> 
+                      <input  style="width:100px;" class="form-control" id="im_width" type="number" placeholder="width *" required="required" data-validation-required-message="Need image width." max=3000> 
                       
                     </div>
                     <div style="display: inline-block;margin:5px;"><img src=img/icons/by.png width="15" alt="x"></div>
                     <div style="display: inline-block;">
-                      <input style="width:100px;"  class="form-control" id="im_height" type="text" placeholder="height *" required="required" data-validation-required-message="Need image height.">
+                      <input style="width:100px;"  class="form-control" id="im_height" type="number" placeholder="height *" required="required" data-validation-required-message="Need image height." max=2500>
                       
                     </div>
                     <p class="help-block text-danger"></p>
