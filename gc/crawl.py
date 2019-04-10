@@ -8,6 +8,8 @@ import threading
 from PIL import Image
 from sklearn.cluster import k_means
 
+from urllib.parse import quote
+
 soups = []
 
 def get_words(query,id,clarify):
@@ -19,7 +21,7 @@ def get_words(query,id,clarify):
             return url
         
         engines = {"google":'https://google.com/search?q=','pinterest':"","yandex":""}
-        url = engines[where] + query
+        url = engines[where] + quote(query)
         response = requests.get(url)
         res = response.text
         if where == 'google':
@@ -36,48 +38,48 @@ def get_words(query,id,clarify):
         res = requests.get(link)
         im_res = res.text
         im_soup = BeautifulSoup(im_res, 'html.parser')
-        srcs = [ each['src'] for each in im_soup.find_all('img')][0:num]
-        imgs = [Image.open(requests.get(each, stream=True).raw) for each in srcs]
-        return imgs
+        srcs = [ each['src'] for each in im_soup.find_all('img')]
+        imgs = []
+        for each in srcs:
+            r = requests.get(each, stream=True)
+            if r.status_code==200:
+                imgs.append(Image.open(r.raw))
+        return imgs[0:num]
 
     def get_cumulative_palette(imgs):
         big_pal = []
+        bins = [0]
         for image in imgs:
             tmp = image.convert('P', palette = Image.PERSPECTIVE, colors=256)
             tmp = np.array(tmp.convert('RGB'))
-            c = k_means(tmp.reshape(tmp.shape[0]*tmp.shape[1],3),16)
+            c = k_means(tmp.reshape(tmp.shape[0]*tmp.shape[1],3),16,init='random')
             palette = np.round(c[0]).astype(int)
             big_pal.append(palette)
+            bins.append(bins[-1]+c[0].shape[0])
     
-        c = k_means(np.vstack(big_pal),10)
-        final_palette = np.round(c[0]).astype(int)
-        indxs = np.argsort(np.sum(final_palette,axis=1))
-        cmap = [ tuple(each) for each in final_palette[indxs] ]
-    
-        return cmap
+        big_palette = np.vstack(big_pal)
 
-#    def parse_url(url):
-#        replaces = { '%3F':'?','%3D':'=','%2520':'%20'}
-#        for key, value in replaces.items():
-#            url = url.replace(key,value)
-#        return url
+        cols = 16
+
+        c = k_means(big_palette,cols)
+
+        span = []
         
-    def get_soups(links):
-        soups = []
-        #responces = []
-        for link in links:
-            if link[0:4]=='http':
-                try:
-                    response = requests.get(link.replace('https','http'),verify=False,timeout=5)
-                    if response.status_code==200:
-                        #responces.append(response.text)
-                        soups.append(BeautifulSoup(response.text, 'html.parser'))
-                except:
-                    pass
-        return soups #, responces
+        for each in np.arange(0,cols):
+            span.append(np.unique(np.digitize(np.argwhere(c[1]==each),bins)).size)
+
+        centr_to_drop = np.arange(0,cols)[np.array(span)<5]
+        
+        filtered_palette = np.array([
+            each for ind,each in enumerate(big_palette) 
+            if c[1][ind] not in centr_to_drop ])
+
+        f_indxs = np.argsort(np.sum(filtered_palette,axis=1))
     
+        return filtered_palette[f_indxs]
+        
     def get_soup(link,num):
-        response = requests.get(link.replace("https","http"), verify=False,timeout=5)
+        response = requests.get(link.replace("https","http"), verify=False,timeout=1)
         if response.status_code==200:
             global soups
             soups[num] = BeautifulSoup(response.text, 'html.parser')
@@ -85,7 +87,7 @@ def get_words(query,id,clarify):
     def cook_soup(s):
         text = ""
 
-        if s==None:
+        if s=="":
             return ""
 
         for each in s.find_all(['p','blockquote']):
@@ -105,7 +107,7 @@ def get_words(query,id,clarify):
 
     def clean_text(t):
         result = t.replace("\n","").lower()
-        result = "".join([ char if char not in '0123456789/\:,.;-!?&()#"%[»]—' else ' ' for char in result ])
+        result = "".join([ char if char in '-+#abcdefghijklmnopqrstuvwxyz%' else ' ' for char in result ])
         return result
 
     from run import log_progress
@@ -119,7 +121,7 @@ def get_words(query,id,clarify):
     log_progress(id)
     
     for ind,each in enumerate(links):
-        soups.append(None)
+        soups.append("")
         threads.append(threading.Thread(target=get_soup, args=([each,ind])))
 
     for num in range(0,len(threads)):
@@ -127,8 +129,6 @@ def get_words(query,id,clarify):
                    
     for num in range(0,len(threads)):
         threads[num].join()
-
-    #soups = get_soups(links)
 
     contents = []
 
@@ -145,7 +145,6 @@ def get_words(query,id,clarify):
         each[0] for each in total_count.most_common(len(total_count)) 
         if each[0] !=query.lower()]
 
-    #log progress start on images
     log_progress(id)
 
     imgs = get_images(images_link)

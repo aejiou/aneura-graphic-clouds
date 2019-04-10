@@ -1,7 +1,5 @@
 from PIL import Image, ImageFilter
-from PIL import Image, ImageDraw, ImageFont, ImageOps 
-from PIL import ImageFont
-from PIL import ImageDraw
+from PIL import ImageDraw, ImageFont, ImageOps
 
 import numpy as np
 
@@ -178,6 +176,15 @@ class Canvas:
                     (x+self.margins[0], y+self.margins[1]),self.word,
                     self.cmap[0],font=font)
 
+    def alpha_effect(self):
+        bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(20)))
+        img_alpha = np.array(self.img.convert("RGBA"))
+        img_alpha[:,:,3] = bmf
+        new_alpha = Image.fromarray(img_alpha)
+        result = Image.new("RGBA",self.img.size,(*self.cmap[-1],255))
+        result.alpha_composite(new_alpha)
+        result.alpha_composite(new_alpha)
+        return result
 
 
 

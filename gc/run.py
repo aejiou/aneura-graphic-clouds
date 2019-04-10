@@ -1,6 +1,8 @@
 import numpy as np
 from itertools import cycle
 
+from sklearn.cluster import k_means
+
 stages = [
     'Getting the links from search engine','Getting content from each of the links',
     'Counting words','Getting color palette','Mapping','Rendering the final image']
@@ -13,7 +15,7 @@ def log_progress(id,message=None):
     if message==None:
         message = stages[step]
         step += 1
-    f.write("Step {} of {}: {}...".format(step+1,len(stages),message))
+    f.write("Step {} of {}: {}...".format(step,len(stages),message))
     f.close()
 
 
@@ -70,38 +72,30 @@ def generate_image(form):
     fonts_to_use = [t_f(form[name]) for name in fontnames]
     fonts_to_use = fonts[fonts_to_use]
 
-    rainbow = (
-        color_gradient((148, 0, 211),(75, 0, 130))[:-1] + 
-        color_gradient((75, 0, 130),(0, 0, 255))[:-1] + 
-        color_gradient((0, 0, 255),(0, 255, 0))[:-1] + 
-        color_gradient((0, 255, 0),(255, 255, 0),4)[:-1] + 
-        color_gradient((255, 255, 0),(255, 127, 0))[:-1] + 
-        color_gradient((255, 127, 0),(255, 0 , 0))[:-1] + 
-        color_gradient((255, 0 , 0),(148, 0, 211))[:-1])
-    
-    #r = np.random.randint(0,len(rainbow))
-    #rainbow = rainbow[r:] + rainbow[:r]
-    rainbow = [tuple((np.array(rainbow[0])/2).astype(int))] + rainbow + [(255,255,255)]
-    #    [tuple((np.array(rainbow[0])+200).astype(int))])
-
-    colors = {
-        'bw': [(0,0,0),(255,255,255)],
-        'gray': [(50,50,50)] + color_gradient((100,100,100),(170,170,170),11) + [(220,220,220)],
-        'rainbow': rainbow
-    }
-
-    #image = Canvas(w,h,colors[form['colors']][::inverter],round(w/reducer))
-    #image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
-
-    #words = [
-    #    'hello','world','all','is','fine','butterflies','unicorns','pagan','rituals',
-    #    'horses','cat','no','yes','forever','dark']
-
     words, cmap = get_words(form['name'],form['identifier'],form['keywords'])
+
+    log_progress(form['identifier'])
     
     transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
-    image = Canvas(w,h,cmap[::inverter],round(w/reducer))
+    color_bins = np.array([[0,0,0],[255,255,255],[255,0,0],[0,255,0],[0,0,255],[255,0,255],[0,255,255],[255,255,0]])
+    key_colors = k_means(cmap,8,init=color_bins)
+
+    if inverter==-1:
+        fin_cmap = np.array(
+            [tuple(np.mean(cmap[key_colors[1]==0],axis=0).astype(int))] +
+            [ tuple(each) for each in cmap[key_colors[1]!=0] ])
+        fin_cmap = fin_cmap[::-1]
+    else:
+        fin_cmap = np.array(
+            [ tuple(each) for each in cmap[key_colors[1]!=1] ] +
+            [tuple(np.mean(cmap[key_colors[1]==1],axis=0).astype(int))])
+
+    #fin_cmap[np.sum(fin_cmap-fin_cmap[0],axis=1)<120] -= inverter*33
+    fin_cmap = [ tuple(each) for each in fin_cmap ]
+
+
+    image = Canvas(w,h,fin_cmap,round(w/reducer))
     image.fit(form['name'],fonts_to_use[np.random.randint(0,len(fonts_to_use))],invert=t_f(form['mask']))
 
 
@@ -115,19 +109,15 @@ def generate_image(form):
             log_progress(form['identifier'],message="Mapping... "+c)
         drops.append(Droplet(transform[form['transform']](word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
-        if image.paste_object(drops[-1])<6:
+        if image.paste_object(drops[-1])<7:
             log_progress(form['identifier'],message="No more free space! Finishing")
             break
-       
-
-    #for _ in range(0,8):
-    #    log_progress(form['identifier'])
-    #    for drop in drops:
-            
+                   
 
     log_progress(form['identifier'])
     image.render()
-    image.img.save('static/tmp/'+form['identifier']+'.jpg',quality=90)
+    alpha = image.alpha_effect().convert('RGB')
+    alpha.save('static/tmp/'+form['identifier']+'.jpg',quality=90)
 
     return {'concept':form['name'],'src':'/tmp/'+form['identifier']+'.jpg','caption':str(form)}
 
