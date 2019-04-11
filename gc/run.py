@@ -141,7 +141,7 @@ def generate_image(form):
     caption = "{} style, mapping words {}, {} background<br><a href={}>({}x{})</a>".format(
         cap(form["style"]),
         ('inside' if t_f(form['mask']) else 'outside'),
-        ('dark' if inverter==1 else 'light'),
+        ('dark' if inverter==-1 else 'light'),
         src, form['im_width'], form['im_height'])
 
     csv = "\t".join([ value for value in form.values() ]) + "\n"
