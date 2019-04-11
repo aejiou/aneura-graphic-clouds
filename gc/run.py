@@ -62,7 +62,7 @@ def generate_image(form):
 
     styles = {
         'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['raleigh'], 'transform': [cap] },
-        'minimal' : { 'fonts': [ 'geometr', 'myriadpro'],'invert':[ 'geometr', 'myriadpro'],'transform':[upper]},
+        'minimal' : { 'fonts': [ 'geometr', 'myriadpro'],'invert':[ 'geometr'],'transform':[upper]},
         'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
     }
 
@@ -79,7 +79,7 @@ def generate_image(form):
     #fonts_to_use = [t_f(form[name]) for name in fontnames]
     #fonts_to_use = fonts[fonts_to_use]
 
-    words, cmap = get_words(form['name'],form['identifier'],form['keywords'])
+    words, cmap = get_words(form['concept'],form['identifier'],form['keywords'])
 
     log_progress(form['identifier'])
     
@@ -108,7 +108,7 @@ def generate_image(form):
 
 
     image = Canvas(w,h,fin_cmap,round(w/reducer))
-    image.fit(form['name'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
+    image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
 
     drops = []
@@ -132,7 +132,19 @@ def generate_image(form):
     alpha = image.alpha_effect().convert('RGB')
     alpha.save('static/tmp/'+form['identifier']+'.jpg',quality=90)
 
-    return {'concept':form['name'],'src':'/tmp/'+form['identifier']+'.jpg','caption':str(form)}
+    concept = 'All about "{}"'.format(form['concept'])
+    if form["keywords"]:
+        concept += " ({})".format(form["keywords"])
+
+    src = '/tmp/'+form['identifier']+'.jpg'
+
+    caption = "{} style, mapping words {}, {} background<br><a href={}>({}x{})</a>".format(
+        cap(form["style"]),
+        ('inside' if t_f(form['mask']) else 'outside'),
+        ('dark' if inverter==1 else 'light'),
+        src, form['im_width'], form['im_height'])
+
+    return {'concept':concept,'src':src,'caption':caption}
 
 
     
