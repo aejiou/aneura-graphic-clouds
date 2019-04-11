@@ -34,8 +34,8 @@ def create():
     di = generate_image(request.form)
 
     os.remove('static/tmp/'+request.form['identifier']+'.log')
-    f=open("requests.log", "a+")
-    f.write(di['caption'])
+    f=open("requests.csv", "a+")
+    f.write(di['log'])
     f.close()
 
     return jsonify(di)

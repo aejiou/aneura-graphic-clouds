@@ -61,7 +61,7 @@ def generate_image(form):
         inverter = 1
 
     styles = {
-        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['raleigh'], 'transform': [cap] },
+        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['raleigh','cloistrk'], 'transform': [cap] },
         'minimal' : { 'fonts': [ 'geometr', 'myriadpro'],'invert':[ 'geometr'],'transform':[upper]},
         'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
     }
@@ -144,7 +144,9 @@ def generate_image(form):
         ('dark' if inverter==1 else 'light'),
         src, form['im_width'], form['im_height'])
 
-    return {'concept':concept,'src':src,'caption':caption}
+    csv = "\t".join([ value for value in form.values() ]) + "\n"
+
+    return {'concept':concept,'src':src,'caption':caption,'log':csv}
 
 
     
