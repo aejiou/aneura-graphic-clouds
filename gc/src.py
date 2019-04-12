@@ -34,7 +34,15 @@ def monochrome(img,th=127):
 
 
 class Canvas:
-    def __init__(self,w,h,cmap=((255,255,255),(0,0,0)),reduce=4):
+    def __init__(self,w,h,cmap=((255,255,255),(0,0,0)),reduce=4,partial=(1,1)):
+        '''
+        Saving dimentions of the image: w,h, colormap: cmap,
+        by how many times is mask smaller than the image: reduce,
+        which portion of the mask to use each time when looking 
+        for the best place to place an object: partial.
+        Then an empty image and queue of objects are created.
+        '''
+        self.partial = partial                
         self.reduce = reduce
         self.w = w
         self.h = h
@@ -45,6 +53,17 @@ class Canvas:
 
         
     def fit(self,word,fontfile,filemask=None,margins=(50,50,50,50),invert=False):
+        '''
+        The central concept: word, font for it: fontfile, 
+        alpha mask as a file:filemask, space to the edge: margins,
+        whether to place objects inside the mask: invert
+        Mask is initialized as black greyscale canvas and 
+        word is placed in the middle.
+        Array of slice positions and size is initialized
+        based on partial.
+        Threshold matrix based on mask is created.
+        Array containing indexes of each pixel is created.
+        '''
         self.word = word
         self.filemask = filemask
         self.margins = margins
@@ -69,6 +88,16 @@ class Canvas:
             self.mask.paste(im,(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2)))
             self.queue.append({'src':'image',
                                'args':[filemask]})
+
+        s_num = [0 if each==1 else ceil(1/each) for each in self.partial]    
+        self.slices = []
+        self.slice_size = ( floor(self.mask_h*self.partial[1]),floor(self.mask_w*self.partial[0]) )
+        step = [(1-p)/n if n>0 else 1 for p,n in zip(self.partial,s_num)]
+        for i in range(0,s_num[1]+1):
+            for j in range(0,s_num[0]+1):
+                self.slices.append([floor(i*step[1]*self.mask_w),floor(j*step[0]*self.mask_w)])
+        self.current_slice = 0
+
             
         if invert:
             self.mask = ImageOps.invert(self.mask)
@@ -82,22 +111,20 @@ class Canvas:
         return self
 
         
-        
-        
     def _threshold_matrix(self,img,th=1):
-        pixels = img.load()
-        w,h = img.size
-        image_matrix = np.zeros((h,w))
-        #threshold = lambda v: -1 if v>2 else 0
-        for col in range(0,w):
-            for row in range(0,h):
-                image_matrix[row,col]=pixels[col,row]>th
-        #if self.invert:
-        #    image_matrix = (image_matrix==0)
-        return image_matrix.astype(int)
-    
+        '''
+        Returns matrix of 0 and 1 based on greyscale image.
+        1 for white, white is where you can't place new
+        objects.
+        '''
+        return (np.array(img)>th).astype(int)    
 
-    def _density_matrix(self,shape='rect',ratio=(1,1)):
+    def _density_matrix(self,offset,size,shape='rect',ratio=(1,1)):
+        '''
+        Calculating which size shape can be placed
+        at each of the possible positions according to
+        the mask. Deprecated.
+        '''
         def _shape(val,shape='rect'):
             nonlocal ratio
             (x,y) = val
@@ -115,13 +142,21 @@ class Canvas:
                     break
             return int(rad)
 
-        self.den_mat = -self.th_mat
-        #(h,w) = self.th_mat.shape
+        (offset_y, offset_x) = offset
+        (h, w) = size
+        self.den_mat = np.zeros(self.th_mat.shape)-1
+        self.den_mat[offset_y:offset_y + h,offset_x:offset_x + w] = -self.th_mat[offset_y:offset_y + h,offset_x:offset_x + w]
         for index_str in self.ind_arr[self.den_mat!=-1]:
             index = [int(_) for _ in index_str.split(' ')]
             self.den_mat[index[0]][index[1]] = _shape(index,shape)
-                
+                        
     def paste_object(self,obj,where='max'):
+        '''
+        Placing each of the objects in the best position
+        on the mask, saving the coordinates into the queue.
+        Max radius is returned, if it's very small then
+        there's likely no free space.
+        '''
         img = obj.mask.copy()
         ratio = np.array(obj.ratio)/max(obj.ratio)
         if np.random.randint(0,2)==1:
@@ -130,7 +165,8 @@ class Canvas:
             img = img.rotate(90,Image.NEAREST,True)
         else:
             rotate = False
-        self._density_matrix('rect',ratio)
+        self._density_matrix(self.slices[self.current_slice],self.slice_size,'rect',ratio)
+        self.current_slice = self.current_slice + 1 if self.current_slice<len(self.slices)-1 else 0
         maxrad = np.max(self.den_mat)
         maxoptions = np.argwhere(self.den_mat.reshape(-1) == np.max(self.den_mat.reshape(-1)))
         choice = maxoptions[np.random.randint(0,maxoptions.size)]
@@ -157,6 +193,9 @@ class Canvas:
         return maxrad
         
     def render(self):
+        '''
+        Rendering the final hi-res image from the queue.
+        '''
         for element in self.queue[1:]:
             if isinstance(element['src'],Droplet):
                 r_color = np.random.randint(0,len(self.cmap)-1)
@@ -180,6 +219,9 @@ class Canvas:
                     self.cmap[0],font=font)
 
     def alpha_effect(self):
+        '''
+        Nice looking blur overlay.
+        '''
         bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(5*self.reduce)))
         img_alpha = np.array(self.img.convert("RGBA"))
         img_alpha[:,:,3] = bmf

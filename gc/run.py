@@ -55,23 +55,27 @@ def generate_image(form):
     else:
         reducer = 500
 
+    partial = (0.6,1) if t_f(form['mask']) else (0.6,0.6)
+
     if t_f(form['inverted']):
         inverter = -1
     else:
         inverter = 1
 
     styles = {
-        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['raleigh','cloistrk'], 'transform': [cap] },
-        'minimal' : { 'fonts': [ 'geometr', 'myriadpro'],'invert':[ 'geometr'],'transform':[upper]},
+        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['belwe','cloistrk'], 'transform': [cap] },
+        'minimal' : { 'fonts': [ 'geometr', 'myriadpro','futura'],'invert':[ 'geometr'],'transform':[upper]},
         'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
     }
 
     style = styles[form['style']]
 
+    '''
     fontnames = [
         'antiqua','ashbury','brochurn','cloistrk', 'cushing','distress','eklektic',
         'geometr', 'hobo', 'lucian', 'motterfem', 'myriadpro', 'nuptial', 'pantspatrol',
         'polaroid','raleigh']
+    '''
 
     fonts_to_use = np.array(['fonts/'+name+'.ttf' for name in style['fonts']])
     fonts_to_use[np.argwhere(fonts_to_use=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
@@ -107,11 +111,13 @@ def generate_image(form):
         fonts_header = fonts_to_use
 
 
-    image = Canvas(w,h,fin_cmap,round(w/reducer))
+    image = Canvas(w,h,fin_cmap,round(w/reducer),partial)
     image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
 
     drops = []
+
+    stopper = 11 if t_f(form['mask']) else 7
 
     for num,word in enumerate(words):
         if np.random.randint(0,4)==2:
@@ -122,7 +128,7 @@ def generate_image(form):
         tr = style['transform'][np.random.randint(0,len(style['transform']))]
         drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
-        if image.paste_object(drops[-1])<7:
+        if image.paste_object(drops[-1])<stopper:
             log_progress(form['identifier'],message="No more free space! Finishing")
             break
                    
