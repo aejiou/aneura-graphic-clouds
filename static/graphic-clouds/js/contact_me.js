@@ -38,6 +38,7 @@ $(function() {
         },
         error: function() {
           // Fail message
+          clearTimeout(u_timer);
           write_message("Sorry, there's an error. Please try something else!","danger");
           //clear all fields
           //$('#contactForm').trigger("reset");

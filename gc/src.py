@@ -95,7 +95,7 @@ class Canvas:
         step = [(1-p)/n if n>0 else 1 for p,n in zip(self.partial,s_num)]
         for i in range(0,s_num[1]+1):
             for j in range(0,s_num[0]+1):
-                self.slices.append([floor(i*step[1]*self.mask_w),floor(j*step[0]*self.mask_w)])
+                self.slices.append([floor(i*step[1]*self.mask_h),floor(j*step[0]*self.mask_w)])
         self.current_slice = 0
 
             
