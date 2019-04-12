@@ -87,27 +87,24 @@ def get_words(query,id,clarify):
     def cook_soup(s):
         text = ""
 
-        if s=="":
+        if not isinstance(s, BeautifulSoup):
             return ""
 
         for each in s.find_all(['p','blockquote']):
             text += each.get_text()
         if text !="":
-            #print('found P and QUOTE')
             return text
         
         for each in s.find_all(['script','style','h1','h2','h3','h4']):
             each.decompose()
-        text = s.find('body').get_text()
-        if text!="":
-            #print('got content from body')
-            return text
-
-        return ""
+        for each in s.find_all('body'):
+            text += each.get_text()
+        
+        return text
 
     def clean_text(t):
         result = t.replace("\n","").lower()
-        result = "".join([ char if char in '-+#1234567890abcdefghijklmnopqrstuvwxyz' else ' ' for char in result ])
+        result = "".join([ char if char not in '!"%&\'()*,./:;<=>?[\\]^_`{|}~' else ' ' for char in result ])
         return result
 
     from run import log_progress
@@ -137,9 +134,13 @@ def get_words(query,id,clarify):
     for each in soups:
         contents.append(clean_text(cook_soup(each)))
 
+    sw = set(stopwords.words('english'))
+    sw.add('also')
+    sw.add('loading')
+
     total_count = Counter([
-        word for word in " ".join(contents).split(" ")
-        if len(word)>1 and word not in set(stopwords.words('english'))])
+        word for word in (" ".join(contents)).split(" ")
+        if len(word)>1 and word not in sw])
 
     words_in_order = [ 
         each[0] for each in total_count.most_common(len(total_count)) 

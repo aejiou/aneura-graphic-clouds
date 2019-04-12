@@ -115,6 +115,7 @@ def generate_image(form):
     image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
     drops = []
+    stopper = 20 if t_f(form['mask']) else 27
 
     for num,word in enumerate(words):
         if np.random.randint(0,4)==2:
@@ -125,10 +126,10 @@ def generate_image(form):
         tr = style['transform'][np.random.randint(0,len(style['transform']))]
         drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
-        if image.paste_object(drops[-1])<27:
-            if image.paste_object(drops[-1])<27:
-                if image.paste_object(drops[-1])<27:
-                    if image.paste_object(drops[-1])<27:
+        if image.paste_object(drops[-1])<stopper:
+            if image.paste_object(drops[-1])<stopper:
+                if image.paste_object(drops[-1])<stopper:
+                    if image.paste_object(drops[-1])<stopper:
                         log_progress(form['identifier'],message="No more free space! Finishing")
                         break
                    
