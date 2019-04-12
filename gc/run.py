@@ -108,7 +108,7 @@ def generate_image(form):
     if t_f(form['mask']):
         fonts_header = ['fonts/'+name+'.ttf' for name in style['invert']]
     else:
-        fonts_header = fonts_to_use
+        fonts_header = [font for font in fonts_to_use if font != 'fonts/distress.ttf']
 
 
     image = Canvas(w,h,fin_cmap,round(w/reducer),partial)
