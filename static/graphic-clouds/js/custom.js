@@ -3,7 +3,7 @@ function imToggle(im,src)
   var res;
   if (im=='il_style') { 
     if (src=='d_l') { src = document.forms[0].elements['style'].value; }
-    d_l = (document.getElementById('inverted').checked) ? '_dark' : "_light"; 
+    d_l = (document.forms[0]['inverted'].checked) ? '_dark' : "_light"; 
     res = src + d_l; 
   } 
   else { res = src; }
