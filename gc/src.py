@@ -178,7 +178,7 @@ class Canvas:
 
         if min(w,h)<0.5:
             if max(w,h)>7:
-                return 10
+                return 15*self.reduce
             else:
                 return 0
 
@@ -190,7 +190,7 @@ class Canvas:
         self.th_mat[y:y+img.size[1],x:x+img.size[0]] = self._threshold_matrix(img)
         self.mask.paste(img,(x,y))
         self.th_mat = self._threshold_matrix(self.mask)
-        return maxrad
+        return maxrad*self.reduce
         
     def render(self):
         '''

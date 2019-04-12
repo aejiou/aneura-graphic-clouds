@@ -51,11 +51,11 @@ def generate_image(form):
     w, h = int(form['im_width']), int(form['im_height'])
 
     if t_f(form['mask']): 
-        reducer = 1000
+        reducer = 800
     else:
-        reducer = 500
+        reducer = 400
 
-    partial = (0.6,1) if t_f(form['mask']) else (0.6,0.6)
+    partial = (0.35,1) if t_f(form['mask']) else (0.5,0.5)
 
     if t_f(form['inverted']):
         inverter = -1
@@ -114,10 +114,7 @@ def generate_image(form):
     image = Canvas(w,h,fin_cmap,round(w/reducer),partial)
     image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
-
     drops = []
-
-    stopper = 11 if t_f(form['mask']) else 7
 
     for num,word in enumerate(words):
         if np.random.randint(0,4)==2:
@@ -128,9 +125,12 @@ def generate_image(form):
         tr = style['transform'][np.random.randint(0,len(style['transform']))]
         drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
-        if image.paste_object(drops[-1])<stopper:
-            log_progress(form['identifier'],message="No more free space! Finishing")
-            break
+        if image.paste_object(drops[-1])<27:
+            if image.paste_object(drops[-1])<27:
+                if image.paste_object(drops[-1])<27:
+                    if image.paste_object(drops[-1])<27:
+                        log_progress(form['identifier'],message="No more free space! Finishing")
+                        break
                    
 
     log_progress(form['identifier'])
