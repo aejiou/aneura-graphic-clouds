@@ -34,7 +34,7 @@ def monochrome(img,th=127):
 
 
 class Canvas:
-    def __init__(self,w,h,cmap=((255,255,255),(0,0,0)),reduce=4,partial=(1,1)):
+    def __init__(self,w,h,reduce=4,partial=(1,1)):
         '''
         Saving dimentions of the image: w,h, colormap: cmap,
         by how many times is mask smaller than the image: reduce,
@@ -46,9 +46,6 @@ class Canvas:
         self.reduce = reduce
         self.w = w
         self.h = h
-        self.cmap = cmap
-        self.img = Image.new("RGB", (self.w,self.h),cmap[-1])
-        self.draw = ImageDraw.Draw(self.img)
         self.queue = []
 
         
@@ -75,13 +72,13 @@ class Canvas:
 
         
         if filemask == None:
-            self.dmask = ImageDraw.Draw(self.mask)
+            draw = ImageDraw.Draw(self.mask)
             (x, y), size = find_fontsize(self.mask_w-(m_margins[0]+m_margins[2]),
                                          self.mask_h-(m_margins[1]+m_margins[3]),
                                          fontfile,
                                          word)
             font = ImageFont.truetype(fontfile,size)
-            self.dmask.text((x+m_margins[0], y+m_margins[1]),word,255,font=font)
+            draw.text((x+m_margins[0], y+m_margins[1]),word,255,font=font)
             self.queue.append({'src':'font','args':[fontfile]})
         else:
             im = Image.open(filemask).convert('L').resize(self.mask.size, Image.ANTIALIAS)
@@ -184,7 +181,8 @@ class Canvas:
 
         self.queue.append({'src':obj,'args':{'size':(w*self.reduce,h*self.reduce),
                                              'pos':(x*self.reduce,y*self.reduce), 
-                                             'rotate':rotate}})
+                                             'rotate':rotate,
+                                             'color': None}})
         img = img.resize((w,h), Image.ANTIALIAS)
         
         self.th_mat[y:y+img.size[1],x:x+img.size[0]] = self._threshold_matrix(img)
@@ -192,46 +190,82 @@ class Canvas:
         self.th_mat = self._threshold_matrix(self.mask)
         return maxrad*self.reduce
         
-    def render(self):
+    def render(self,cmap=((255,255,255),(0,0,0)),size=None, margins=(0,0,0,0)):
         '''
         Rendering the final hi-res image from the queue.
-        '''
+        '''   
+        self.cmap = cmap
+
+        if size == None:
+            size = (self.w,self.h)
+
+        imgsize = (size[0]-margins[0]-margins[2],size[1]-margins[1]-margins[3])
+        scale = min( imgsize[0]/self.w, imgsize[1]/self.h )
+        imgsize = ( int(scale*self.w),int(scale*self.h) )
+
+        self.img = Image.new("RGB", imgsize,cmap[-1])
+
         for element in self.queue[1:]:
             if isinstance(element['src'],Droplet):
-                r_color = np.random.randint(0,len(self.cmap)-1)
-                img = element['src'].render((self.cmap[r_color],self.cmap[-1]))
+                if element['args']['color'] == None:
+                    r_color = np.random.randint(0,len(self.cmap)-1)
+                    element['args']['color'] = r_color
+                img = element['src'].render((self.cmap[element['args']['color']],self.cmap[-1]))
                 if element['args']['rotate']:
                     img = img.rotate(90,Image.NEAREST,True)
-                w, h = element['args']['size'][0], element['args']['size'][1]
-                x, y = element['args']['pos'][0], element['args']['pos'][1]
-                img = img.resize((w,h), Image.ANTIALIAS)
-                self.img.paste(img,(x,y))
+                w, h = element['args']['size'][0]*scale, element['args']['size'][1]*scale
+                x, y = element['args']['pos'][0]*scale, element['args']['pos'][1]*scale
+                img = img.resize((int(w),int(h)), Image.ANTIALIAS)
+                self.img.paste(img,(int(x),int(y)))
 
         if self.queue[0]['src']=='font':
             if self.invert==False:
-                (x, y), size = find_fontsize(
-                    self.w-(self.margins[0]+self.margins[2]),
-                    self.h-(self.margins[1]+self.margins[3]),
-                    self.queue[0]['args'][0],self.word)
-                font = ImageFont.truetype(self.queue[0]['args'][0],size)
-                self.draw.text(
-                    (x+self.margins[0], y+self.margins[1]),self.word,
-                    self.cmap[0],font=font)
+                self.queue[0]['args'].append(self.cmap[0])
+                w = imgsize[0]-(self.margins[0]+self.margins[2])*scale
+                h = imgsize[1]-(self.margins[1]+self.margins[3])*scale
+                (x, y), fsize = find_fontsize(int(w),int(h),self.queue[0]['args'][0],self.word)
+                font = ImageFont.truetype(self.queue[0]['args'][0],fsize)
+                draw = ImageDraw.Draw(self.img)
+                draw.text(
+                    (int(x+self.margins[0]*scale), 
+                    int(y+self.margins[1]*scale)),
+                    self.word,self.cmap[0],font=font)
 
-    def alpha_effect(self):
+        self.img = self._alpha_effect(scale).convert('RGB')
+
+        if margins!=(0,0,0,0):
+            new = Image.new("RGB", size, cmap[-1])
+            margins_adjust = (int((size[0]-imgsize[0]-margins[0]-margins[2])/2) , int((size[1]-imgsize[1]-margins[1]-margins[3])/2))
+            new.paste(self.img,(margins[0]+margins_adjust[0],margins[1]+margins_adjust[1]))
+            self.img = new
+
+
+    def _alpha_effect(self,scale=1):
         '''
         Nice looking blur overlay.
         '''
-        bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(5*self.reduce)))
+        bmf = np.array(self.mask.copy().resize(self.img.size,Image.BILINEAR).filter(ImageFilter.GaussianBlur(5*self.reduce*scale)))
         img_alpha = np.array(self.img.convert("RGBA"))
         img_alpha[:,:,3] = bmf
         new_alpha = Image.fromarray(img_alpha)
         result = Image.new("RGBA",self.img.size,(*self.cmap[-1],255))
-        result.alpha_composite(new_alpha)
-        result.alpha_composite(new_alpha)
+        for _ in range(0,3):
+            result.alpha_composite(new_alpha)
         if self.invert:
             result.alpha_composite(new_alpha)
         return result
+
+    def pickle(self):
+        self.np_img = np.array(self.img)
+        self.src = None
+        self.np_mask = np.array(self.mask)
+        self.mask = None
+
+    def unpickle(self):
+        self.img = Image.fromarray(self.np_img)
+        self.np_img = None
+        self.mask = Image.fromarray(self.np_mask)
+        self.np_mask = None
 
 
 
@@ -245,44 +279,60 @@ class Droplet:
         self.file = source
         
         if self.image:
-            self.src = Image.open(source)
-            self.mask = monochrome(self.src)
-            self.w, self.h = self.src.size
+            self.img = Image.open(source)
+            self.mask = monochrome(self.img)
+            self.w, self.h = self.img.size
         else:    
-            self.font = ImageFont.truetype(source,500)
-            tw, th = self.font.getsize(self.word)
-            (width, baseline), (self.offset_x, self.offset_y) = self.font.font.getsize(self.word)
+            font = ImageFont.truetype(self.file,500)
+            tw, th = font.getsize(self.word)
+            (width, baseline), (self.offset_x, self.offset_y) = font.font.getsize(self.word)
             self.w = tw - self.offset_x + 4
             self.h = th - self.offset_y + 4
         
         self.mask = Image.new("L", (self.w,self.h),0)
         
         if self.image:
-            self.mask.paste(self.src,(0,0))
+            self.mask.paste(self.img,(0,0))
         else:
             draw = ImageDraw.Draw(self.mask)
-            draw.text((2-self.offset_x,2-self.offset_y),self.word,255,font=self.font)
+            draw.text((2-self.offset_x,2-self.offset_y),self.word,255,font=font)
             
         self.ratio = (self.w/min(self.w,self.h),self.h/min(self.w,self.h))
         return self
     
-    def render(self,cmap=((255,255,255),(0,0,0)),scale=1):
+    def render(self,cmap=((255,255,255),(0,0,0)),size=None):
             
         if self.image:
-            result = self.src.copy()
-            if scale!=1:
-                result = result.resize((int(self.w*scale),int(self.h*scale)),Image.ANTIALIAS)
+            result = self.img.copy()
+            if size!=None:
+                result = result.resize((int(size[0]),int(size[1])),Image.ANTIALIAS)
         else:
-            if scale==1:
+            if size==None:
                 result = Image.new("RGB", (self.w,self.h), cmap[-1])
                 draw = ImageDraw.Draw(result)
-                draw.text((2-self.offset_x,2-self.offset_y),self.word,cmap[0],font=self.font)
+                font = ImageFont.truetype(self.file,500)
+                draw.text((2-self.offset_x,2-self.offset_y),self.word,cmap[0],font=font)
             else:
-                (w,h) = (floor(self.w*scale),floor(self.h*scale))
+                (w,h) = (size[0],size[1])
                 result = Image.new("RGB", (w,h), cmap[-1])
                 draw = ImageDraw.Draw(result)
                 (x, y), size = find_fontsize((w-4),(h-4),self.file,self.word)
-                draw.text((x+2, y+2),self.word,cmap[0],font=ImageFont.truetype(self.file,size))                
+                draw.text((x+2, y+2),self.word,cmap[0],font=ImageFont.truetype(self.file,size))
+            self.img = result                
                           
-        return result
+        return self.img
+    
+    def pickle(self):
+        self.np_img = np.array(self.img)
+        self.img = None
+        self.np_mask = np.array(self.mask)
+        self.mask = None
+
+    def unpickle(self):
+        self.img = Image.fromarray(self.np_img)
+        self.np_img = None
+        self.mask = Image.fromarray(self.np_mask)
+        self.np_mask = None
+
+    
 
