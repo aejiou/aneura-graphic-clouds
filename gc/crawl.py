@@ -115,7 +115,7 @@ def get_words(query,id,clarify):
     soups = []
     threads = []
 
-    log_progress(id)
+    log_progress(id,1)
     
     for ind,each in enumerate(links):
         soups.append("")
@@ -129,7 +129,7 @@ def get_words(query,id,clarify):
 
     contents = []
 
-    log_progress(id)
+    log_progress(id,2)
 
     for each in soups:
         contents.append(clean_text(cook_soup(each)))
@@ -146,7 +146,7 @@ def get_words(query,id,clarify):
         each[0] for each in total_count.most_common(len(total_count)) 
         if each[0] !=query.lower()]
 
-    log_progress(id)
+    log_progress(id,3)
 
     imgs = get_images(images_link)
 

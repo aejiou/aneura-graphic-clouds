@@ -1,0 +1,146 @@
+.field {
+    display: block; 
+    width: 536px;
+    height: 522px;
+    position: absolute;
+    visibility: hidden;
+    top:0px;
+    left:0;
+    margin:40px;
+}
+
+.blob {
+    -webkit-animation-name: live;
+    -webkit-animation-duration: .7s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-name: live;
+    animation-duration: 7s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    position: relative;
+    top:0;
+    left: 0;
+}
+@-webkit-keyframes live {
+    0%, 100% {
+        -webkit-transform: skewX(-4deg);
+        -webkit-transform: skewY(-4deg); 
+    }
+    25% { -webkit-transform: skewX(2deg);-webkit-transform: skewY(-8deg);}
+    75% { -webkit-transform: skewX(-8deg);-webkit-transform: skewY(0deg); }
+}
+@keyframes live {
+    0%, 100% {
+        transform: skewX(-4deg);
+        transform: skewY(-4deg);     
+    }
+    25% { transform: skewX(2deg);  transform: skewY(-8deg); }
+    75% { transform: skewX(-8deg); transform: skewY(0deg); }
+}
+.time-play {
+width: 118px;
+max-width: 118px;
+overflow: hidden;
+height: 118px;
+-border-radius: 59px; 
+-webkit-border-radius: 59px; 
+background: black;
+position: absolute;
+top: 198px;
+left: 70px;
+text-align: center;
+}
+.hole-bg {
+width: 74px;
+height: 74px;
+-border-radius: 37px; 
+-webkit-border-radius: 37px; 
+background: black;
+position: absolute;
+}
+
+.hole {
+width: 74px;
+height: 74px;
+position: absolute;
+}
+.mole {
+width: 74px;
+height: 92px;
+position: absolute;
+overflow: hidden;
+}
+
+.mole-pic {
+position: absolute;
+bottom: -105px;
+transition: bottom 0.5s ease;
+}
+
+.mole-pic.up {
+bottom: -30px;
+}
+
+.mole-pic.bonked {
+opacity: 0.1;
+transition: 0.4s ease-out;
+}
+
+.mole-bg {
+background: url('../img/game/mole.png');
+background-repeat: no-repeat;
+background-position: top center;
+}
+
+
+
+.row1 {
+left: 229px;
+}
+.row2 {
+left: 347px;
+}
+
+.btn-start {
+position: absolute;
+top: 0;
+left: 0;
+width: 118px;
+height: 118px;
+background: url('../img/game/play.gif');
+border: 0;
+}
+
+.btn-start.hidden {visibility: hidden;}
+
+.btn-start:focus {outline: none;}
+
+.time {
+font-family: ZCOOL XiaoWei, sans-serif;
+text-transform: uppercase;
+color: white;
+font-size: 16px;
+text-align: center;
+padding-top: 25px;
+line-height: 28px;
+font-weight: bold;
+}
+
+.time em {
+font-size: 40px;
+font-style: normal;
+}
+
+.message {
+position: absolute;
+top: 200px;
+left: 550px;
+width: 400px;
+}
+
+.message .capt {
+    font-family: unset;
+    text-transform: none;
+    font-weight: normal;
+}

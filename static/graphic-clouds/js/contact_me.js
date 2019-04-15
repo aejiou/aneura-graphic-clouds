@@ -11,6 +11,8 @@ $(function() {
       $('#output').html("");
       write_message('Information submitted! Starting...','success');
       my_data = sendStyle();
+      document.getElementById("game-layer").style.position = "relative";
+      document.getElementById("game-layer").style.visibility = "visible";
 
       event.preventDefault(); // prevent default submit behaviour
       // get values from FORM
@@ -47,6 +49,9 @@ $(function() {
           clearTimeout(u_timer);
           if (status == 'success')
           {
+            document.getElementById("game-layer").style.visibility = "hidden";
+            document.getElementById("game-layer").style.position = "absolute";
+            wam.end();
             write_output(JSON.parse(jqXHR.responseText));
             setTimeout(function() {
             $this.prop("disabled", false); // Re-enable submit button when AJAX call is complete

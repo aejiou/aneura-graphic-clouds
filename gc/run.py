@@ -3,19 +3,14 @@ from itertools import cycle
 
 from sklearn.cluster import k_means
 
-stages = [
+def log_progress(id,step,message=None):
+    stages = [
     'Getting the links from search engine','Getting content from each of the links',
     'Counting words','Getting color palette','Mapping','Rendering the final image']
-step = 0
-
-def log_progress(id,message=None):
-    global step
-    global stages
     f = open("static/tmp/"+id+".log", "w")
     if message==None:
         message = stages[step]
-        step += 1
-    f.write("Step {} of {}: {}...".format(step,len(stages),message))
+    f.write("Step {} of {}: {}...".format(step+1,len(stages),message))
     f.close()
 
 
@@ -38,9 +33,10 @@ def generate_image(form):
 
     global stages 
     global step   
+
     step = 0     
 
-    log_progress(form['identifier'])
+    log_progress(form['identifier'],0)
 
     t_f = lambda x: True if x=='true' else False
 
@@ -85,7 +81,7 @@ def generate_image(form):
 
     words, cmap = get_words(form['concept'],form['identifier'],form['keywords'])
 
-    log_progress(form['identifier'])
+    log_progress(form['identifier'],4)
     
     #transform = {'upper':upper,'lower':lower,'cap':cap,'rand':rand}    
 
@@ -122,7 +118,7 @@ def generate_image(form):
             if num<2:
                 num = 2
             c = str(num) + ' words placed'
-            log_progress(form['identifier'],message="Mapping... "+c)
+            log_progress(form['identifier'],4,message="Mapping... "+c)
         tr = style['transform'][np.random.randint(0,len(style['transform']))]
         drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
@@ -130,11 +126,11 @@ def generate_image(form):
             if image.paste_object(drops[-1])<stopper:
                 if image.paste_object(drops[-1])<stopper:
                     if image.paste_object(drops[-1])<stopper:
-                        log_progress(form['identifier'],message="No more free space! Finishing")
+                        log_progress(form['identifier'],4,message="No more free space! Finishing")
                         break
                    
 
-    log_progress(form['identifier'])
+    log_progress(form['identifier'],5)
     image.render()
     alpha = image.alpha_effect().convert('RGB')
     alpha.save('static/tmp/'+form['identifier']+'.jpg',quality=90)

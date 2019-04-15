@@ -21,15 +21,6 @@ def gc():
 
 @app.route('/clouds-submit', methods=['POST'])
 def create():
-    #elems = [
-    #    'identifier','name','engine','t_im_range','transform','colors',
-    #    'im_width','im_height', ,'inverted'
-    #    ]
-    #text = ""
-    #for each in elems:
-    #    text += each + ' ' + str(request.form[each]) + "\n"
-
-    #return '123'
 
     di = generate_image(request.form)
 

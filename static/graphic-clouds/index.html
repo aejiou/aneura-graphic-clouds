@@ -36,6 +36,8 @@
   <script src="js/ion.rangeSlider.min.js"></script>
   <script src="js/custom.js"></script>
 
+  <link href="css/game.css" rel="stylesheet">
+
 
 </head>
 
@@ -446,6 +448,59 @@ function dispP(n) {
               <div class="modal-body">
                 <div id="progress"><br></div>
                 <div id="output"></div>
+                <div id="game-layer" class="field">
+                    <div class="game-field" id="game-field">
+                        <img src="img/game/blob.gif" class="blob">
+                        <div class="time-play">
+                            <img class="btn-start" id="btn-start">
+                            <div class="time" id="time"></div>
+                        </div>
+                        <div class="hole-bg row1" style="top:53px;"></div>
+                        <div class="mole row1" style="top:50px;">
+                            <div class="mole-pic mole-bg" id="mole-01"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row1" style="top:110px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row1" style="top:137px;"></div>
+                        <div class="mole row1" style="top:134px;">
+                                <div class="mole-pic mole-bg" id="mole-02"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row1" style="top:194px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row1" style="top:220px;"></div>
+                        <div class="mole row1" style="top:217px;">
+                                <div class="mole-pic mole-bg" id="mole-03"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row1" style="top:277px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row1" style="top:304px;"></div>
+                        <div class="mole row1" style="top:301px;">
+                                <div class="mole-pic mole-bg" id="mole-04"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row1" style="top:361px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row1" style="top:387px;"></div>
+                        <div class="mole row1" style="top:384px;">
+                                <div class="mole-pic mole-bg" id="mole-05"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row1" style="top:444px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row2" style="top:137px;"></div>
+                        <div class="mole row2" style="top:134px;">
+                                <div class="mole-pic mole-bg" id="mole-06"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row2" style="top:194px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row2" style="top:220px;"></div>
+                        <div class="mole row2" style="top:217px;">
+                                <div class="mole-pic mole-bg" id="mole-07"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row2" style="top:277px;"><img src=img/game/hole.png></div>
+                        <div class="hole-bg row2" style="top:304px;"></div>
+                        <div class="mole row2" style="top:301px;">
+                                <div class="mole-pic mole-bg" id="mole-08"><img src=img/game/drums.gif></div>
+                        </div>
+                        <div class="hole row2" style="top:361px;"><img src=img/game/hole.png></div>
+                        <div class="message">
+                            <h4 class="text-uppercase">Network accuracy: <span id="score-out">?</span></h4>
+                            <p id="message" class="text-muted">Can AI take over the world?</p>
+                        </div>
+                        </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -614,7 +669,7 @@ function dispP(n) {
     </div>
   </div>
 
-      <!-- Modal 3 -->
+      <!-- Modal 5 -->
   <div class="portfolio-modal modal fade" id="portfolioModal5" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -642,7 +697,7 @@ function dispP(n) {
     </div>
   </div>
 
-    <!-- Modal 3 -->
+    <!-- Modal 6 -->
     <div class="portfolio-modal modal fade" id="portfolioModal6" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -670,7 +725,7 @@ function dispP(n) {
       </div>
     </div>
 
-      <!-- Modal 3 -->
+      <!-- Modal 7 -->
   <div class="portfolio-modal modal fade" id="portfolioModal7" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -698,7 +753,7 @@ function dispP(n) {
     </div>
   </div>
 
-    <!-- Modal 3 -->
+    <!-- Modal 8 -->
     <div class="portfolio-modal modal fade" id="portfolioModal8" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -726,7 +781,7 @@ function dispP(n) {
       </div>
     </div>
 
-      <!-- Modal 3 -->
+      <!-- Modal 9 -->
   <div class="portfolio-modal modal fade" id="portfolioModal9" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -760,6 +815,7 @@ function dispP(n) {
   <!-- Bootstrap core JavaScript -->
   <script src="../js/bootstrap.bundle.min.js"></script>
 
+  <script src="js/game.js"></script>
 
   <!-- Plugin JavaScript -->
   <script src="../js/jquery.easing.min.js"></script>
