@@ -59,7 +59,7 @@ def generate_image(form):
         inverter = 1
 
     styles = {
-        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['belwe','cloistrk'], 'transform': [cap] },
+        'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['belwe'], 'transform': [cap] },
         'minimal' : { 'fonts': [ 'geometr', 'myriadpro','futura'],'invert':[ 'geometr'],'transform':[upper]},
         'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
     }
