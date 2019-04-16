@@ -132,7 +132,7 @@ def generate_image(form):
 
     log_progress(form['identifier'],5)
     
-    image.render(fin_cmap)
+    image.render(fin_cmap,margins=(0,0,0,0))
     image.img.save('static/tmp/'+form['identifier']+'.jpg',quality=90)
 
     #converting all Image objects to numpy arrays to pickle

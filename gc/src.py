@@ -11,21 +11,24 @@ def find_fontsize(w,h,font_url,text):
         w, h = font.getsize(text)
         (width, baseline), (offset_x, offset_y) = font.font.getsize(text)
         return (w,h), (offset_x, offset_y)
-    def go_search(start,shift):
+    def go_search(start,shift,step):
         nonlocal font_url, text
         start += shift
         (tw,th), (offset_x, offset_y) = get_font_metrics(font_url,text,start)
         aw = tw - offset_x
         ah = th - offset_y
         offset = lambda x: -1 if x else 1
-        new_shift = offset((aw>w or ah>h))
+        new_shift = offset((aw>w or ah>h))*step
         if new_shift != -shift:
-            return go_search(start,new_shift)
-        else:     
-            return (tw + offset_x, th + offset_y, start)
+            return go_search(start,new_shift,step)
+        else:   
+            if step !=1:
+                return go_search(start,round(new_shift/step),1)
+            else:  
+                return tw + offset_x, th + offset_y, start
 
     start = min(w,h)
-    x,y, finsize = go_search(start,0)
+    x,y, finsize = go_search(start,0,10)
     return (round((w-x)/2),round((h-y)/2)), finsize
 
 def monochrome(img,th=127):
@@ -64,7 +67,7 @@ class Canvas:
         self.word = word
         self.filemask = filemask
         self.margins = margins
-        m_margins = np.round(np.array(margins)/self.reduce).astype(int)
+        self.m_margins = np.round(np.array(margins)/self.reduce).astype(int)
         self.invert = invert
         self.mask_h = floor((self.h/self.reduce))
         self.mask_w = floor((self.w/self.reduce))        
@@ -73,12 +76,12 @@ class Canvas:
         
         if filemask == None:
             draw = ImageDraw.Draw(self.mask)
-            (x, y), size = find_fontsize(self.mask_w-(m_margins[0]+m_margins[2]),
-                                         self.mask_h-(m_margins[1]+m_margins[3]),
+            (x, y), size = find_fontsize(self.mask_w-(self.m_margins[0]+self.m_margins[2]),
+                                         self.mask_h-(self.m_margins[1]+self.m_margins[3]),
                                          fontfile,
                                          word)
             font = ImageFont.truetype(fontfile,size)
-            draw.text((x+m_margins[0], y+m_margins[1]),word,255,font=font)
+            draw.text((x+self.m_margins[0], y+self.m_margins[1]),word,255,font=font)
             self.queue.append({'src':'font','args':[fontfile]})
         else:
             im = Image.open(filemask).convert('L').resize(self.mask.size, Image.ANTIALIAS)
@@ -168,7 +171,7 @@ class Canvas:
         maxoptions = np.argwhere(self.den_mat.reshape(-1) == np.max(self.den_mat.reshape(-1)))
         choice = maxoptions[np.random.randint(0,maxoptions.size)]
         maxcenter = np.unravel_index(choice,self.den_mat.shape)
-        w, h = ratio[0]*maxrad*2-1, maxrad*ratio[1]*2-1
+        w, h = ratio[0]*(maxrad*2-2), (maxrad*2-2)*ratio[1]
         x, y = maxcenter[1]-maxrad*ratio[0]+1, maxcenter[0]-maxrad*ratio[1]+1
         w, h = floor(w), floor(h)
         x, y = ceil(x), ceil(y)
@@ -222,14 +225,14 @@ class Canvas:
         if self.queue[0]['src']=='font':
             if self.invert==False:
                 self.queue[0]['args'].append(self.cmap[0])
-                w = imgsize[0]-(self.margins[0]+self.margins[2])*scale
-                h = imgsize[1]-(self.margins[1]+self.margins[3])*scale
-                (x, y), fsize = find_fontsize(int(w),int(h),self.queue[0]['args'][0],self.word)
+                w = imgsize[0]-(self.m_margins[0]+self.m_margins[2])*self.reduce*scale
+                h = imgsize[1]-(self.m_margins[1]+self.m_margins[3])*self.reduce*scale
+                (x, y), fsize = find_fontsize(floor(w),floor(h),self.queue[0]['args'][0],self.word)
                 font = ImageFont.truetype(self.queue[0]['args'][0],fsize)
                 draw = ImageDraw.Draw(self.img)
                 draw.text(
-                    (int(x+self.margins[0]*scale), 
-                    int(y+self.margins[1]*scale)),
+                    (floor(x+self.m_margins[0]*self.reduce*scale), 
+                    floor(y+self.m_margins[1]*self.reduce*scale)),
                     self.word,self.cmap[0],font=font)
 
         self.img = self._alpha_effect(scale).convert('RGB')
