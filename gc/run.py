@@ -161,7 +161,6 @@ def generate_image(form):
     f.write(csv)
     f.close()
 
-
     return {'concept':concept,'src':src,'caption':caption,'id':form['identifier']}
 
 

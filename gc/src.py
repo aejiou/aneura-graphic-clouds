@@ -192,7 +192,8 @@ class Canvas:
         
     def render(self,cmap=((255,255,255),(0,0,0)),size=None, margins=(0,0,0,0)):
         '''
-        Rendering the final hi-res image from the queue.
+        Rendering the final hi-res image from the queue
+        and appying alpha gaussian blur.
         '''   
         self.cmap = cmap
 
@@ -256,14 +257,14 @@ class Canvas:
         return result
 
     def pickle(self):
-        self.np_img = np.array(self.img)
-        self.src = None
+        #self.np_img = np.array(self.img)
+        self.img = None
         self.np_mask = np.array(self.mask)
         self.mask = None
 
     def unpickle(self):
-        self.img = Image.fromarray(self.np_img)
-        self.np_img = None
+        #self.img = Image.fromarray(self.np_img)
+        #self.np_img = None
         self.mask = Image.fromarray(self.np_mask)
         self.np_mask = None
 
@@ -318,19 +319,19 @@ class Droplet:
                 draw = ImageDraw.Draw(result)
                 (x, y), size = find_fontsize((w-4),(h-4),self.file,self.word)
                 draw.text((x+2, y+2),self.word,cmap[0],font=ImageFont.truetype(self.file,size))
-            self.img = result                
+            #self.img = result                
                           
-        return self.img
+        return result
     
     def pickle(self):
-        self.np_img = np.array(self.img)
+        #self.np_img = np.array(self.img)
         self.img = None
         self.np_mask = np.array(self.mask)
         self.mask = None
 
     def unpickle(self):
-        self.img = Image.fromarray(self.np_img)
-        self.np_img = None
+        #self.img = Image.fromarray(self.np_img)
+        #self.np_img = None
         self.mask = Image.fromarray(self.np_mask)
         self.np_mask = None
 
