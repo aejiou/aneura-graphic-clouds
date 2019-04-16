@@ -136,11 +136,11 @@ def generate_image(form):
     image.img.save('static/tmp/'+form['identifier']+'.jpg',quality=90)
 
     #converting all Image objects to numpy arrays to pickle
-    for element in image.queue[1:]:
-        element['src'].pickle()
-    image.pickle()
+    #for element in image.queue[1:]:
+    #    element['src'].pickle()
+    #image.pickle()
 
-    pickle.dump( image, open( "pickles/"+form['identifier']+".pkl", "wb" ) )
+    #pickle.dump( image, open( "pickles/"+form['identifier']+".pkl", "wb" ) )ls
 
     #creating output dictionary
     concept = 'All about "{}"'.format(form['concept'])
