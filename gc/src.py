@@ -225,14 +225,14 @@ class Canvas:
         if self.queue[0]['src']=='font':
             if self.invert==False:
                 self.queue[0]['args'].append(self.cmap[0])
-                w = imgsize[0]-(self.m_margins[0]+self.m_margins[2])*self.reduce*scale
+                w = imgsize[0]-(self.margins[0]+self.margins[2])*scale
                 h = imgsize[1]-(self.m_margins[1]+self.m_margins[3])*self.reduce*scale
                 (x, y), fsize = find_fontsize(floor(w),floor(h),self.queue[0]['args'][0],self.word)
                 font = ImageFont.truetype(self.queue[0]['args'][0],fsize)
                 draw = ImageDraw.Draw(self.img)
                 draw.text(
-                    (floor(x+self.m_margins[0]*self.reduce*scale), 
-                    floor(y+self.m_margins[1]*self.reduce*scale)),
+                    (round(x+self.margins[0]*scale), 
+                    round(y+self.margins[1]*scale)),
                     self.word,self.cmap[0],font=font)
 
         self.img = self._alpha_effect(scale).convert('RGB')
