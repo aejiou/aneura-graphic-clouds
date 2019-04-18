@@ -4,7 +4,7 @@
 <head>
 
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
   <meta name="description" content="">
   <meta name="author" content="">
 
@@ -448,8 +448,9 @@ function dispP(n) {
               <div class="modal-body">
                 <div id="progress"><br></div>
                 <div id="output"></div>
-                <div id="game-layer" class="field">
-                    <div class="game-field" id="game-field">
+                <!-- <div id="game-layer" class="field">-->
+                <div class="row game-field" id="game-layer">
+                    <div class="col-md-6 field" id="game-field">
                         <img src="img/game/blob.gif" class="blob" draggable="false">
                         <div class="time-play">
                             <img class="btn-start" id="btn-start">
@@ -495,13 +496,12 @@ function dispP(n) {
                                 <div class="mole-pic mole-bg" id="mole-08"><img src=img/game/drums.gif draggable="false"></div>
                         </div>
                         <div class="hole row2" style="top:361px;"><img src=img/game/hole.png draggable="false"></div>
-                        <div class="message">
-                            <h4 class="text-uppercase">Network accuracy: <span id="score-out">?</span></h4>
-                            <p id="message" class="text-muted">Can AI take over the world?</p>
-                            <p class="text-muted"><a href=https://www.youtube.com/watch?v=lPkz_ippXfw target="_blank">Or just watch a video<br>"about neural networks".</a></p>
-                        </div>
-                        </div>
-                </div>
+                      </div>
+                      <div class="message col-md-6">
+                        <h4 class="text-uppercase">Network accuracy:&nbsp;<span id="score-out">?</span></h4>
+                        <p id="message" class="text-muted">Can AI take over the world?</p>
+                         <p class="text-muted"><a href=https://www.youtube.com/watch?v=lPkz_ippXfw target="_blank">Or just watch a video<br>"about neural networks".</a></p>
+                      </div>
                 </div>
               </div>
             </div>

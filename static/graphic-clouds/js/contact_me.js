@@ -11,7 +11,7 @@ $(function() {
       $('#output').html("");
       write_message('Information submitted! Starting...','success');
       my_data = sendStyle();
-      document.getElementById("game-layer").style.position = "relative";
+      //document.getElementById("game-layer").style.position = "relative";
       document.getElementById("game-layer").style.visibility = "visible";
 
       event.preventDefault(); // prevent default submit behaviour

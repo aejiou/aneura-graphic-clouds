@@ -1,12 +1,11 @@
-.field {
-    display: block; 
-    width: 536px;
-    height: 522px;
-    position: absolute;
+.game-field {
     visibility: hidden;
-    top:0px;
-    left:0;
-    margin:40px;
+    margin-top:40px;
+    height:100%;
+}
+
+.field {
+    min-width: 450px;
 }
 
 .blob {
@@ -133,10 +132,10 @@ font-style: normal;
 }
 
 .message {
-position: absolute;
-top: 200px;
-left: 550px;
-width: 400px;
+margin-top:50px;
+min-width: 400px;
+vertical-align: middle;
+display: inline-block;
 }
 
 .message .capt {
