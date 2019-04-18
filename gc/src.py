@@ -75,14 +75,21 @@ class Canvas:
 
         
         if filemask == None:
-            draw = ImageDraw.Draw(self.mask)
-            (x, y), size = find_fontsize(self.mask_w-(self.m_margins[0]+self.m_margins[2]),
-                                         self.mask_h-(self.m_margins[1]+self.m_margins[3]),
+            #draw = ImageDraw.Draw(self.mask)
+            #(x, y), size = find_fontsize(self.mask_w-(self.m_margins[0]+self.m_margins[2]),
+            #                             self.mask_h-(self.m_margins[1]+self.m_margins[3]),
+            #                             fontfile,
+            #                             word)
+            (x, y), size = find_fontsize(self.w-(self.margins[0]+self.margins[2]),
+                                         self.h-(self.margins[1]+self.margins[3]),
                                          fontfile,
                                          word)
             font = ImageFont.truetype(fontfile,size)
-            draw.text((x+self.m_margins[0], y+self.m_margins[1]),word,255,font=font)
-            self.queue.append({'src':'font','args':[fontfile]})
+            tmp = Image.new("L", (self.w,self.h),0)
+            draw = ImageDraw.Draw(tmp)
+            draw.text((x+self.margins[0], y+self.margins[1]),word,255,font=font)
+            self.mask.paste(tmp.resize(self.mask.size,Image.ANTIALIAS))
+            self.queue.append({'src':'font','args':{'file':fontfile,'pos':(x, y),'size':size,'color':None}})
         else:
             im = Image.open(filemask).convert('L').resize(self.mask.size, Image.ANTIALIAS)
             self.mask.paste(im,(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2)))
@@ -178,9 +185,9 @@ class Canvas:
 
         if min(w,h)<0.5:
             if max(w,h)>7:
-                return 15*self.reduce
+                return 15*self.reduce, False
             else:
-                return 0
+                return 0, False
 
         self.queue.append({'src':obj,'args':{'size':(w*self.reduce,h*self.reduce),
                                              'pos':(x*self.reduce,y*self.reduce), 
@@ -191,7 +198,7 @@ class Canvas:
         self.th_mat[y:y+img.size[1],x:x+img.size[0]] = self._threshold_matrix(img)
         self.mask.paste(img,(x,y))
         self.th_mat = self._threshold_matrix(self.mask)
-        return maxrad*self.reduce
+        return maxrad*self.reduce, True
         
     def render(self,cmap=((255,255,255),(0,0,0)),size=None, margins=(0,0,0,0)):
         '''
@@ -224,16 +231,19 @@ class Canvas:
 
         if self.queue[0]['src']=='font':
             if self.invert==False:
-                self.queue[0]['args'].append(self.cmap[0])
-                w = imgsize[0]-(self.margins[0]+self.margins[2])*scale
-                h = imgsize[1]-(self.m_margins[1]+self.m_margins[3])*self.reduce*scale
-                (x, y), fsize = find_fontsize(floor(w),floor(h),self.queue[0]['args'][0],self.word)
-                font = ImageFont.truetype(self.queue[0]['args'][0],fsize)
+                if self.queue[0]['args']['color'] == None:
+                    self.queue[0]['args']['color'] = self.cmap[0]
+                if scale==1:
+                    (x, y), fsize = self.queue[0]['args']['pos'],self.queue[0]['args']['size']
+                    m1, m2 = self.margins[0], self.margins[1]
+                else:
+                    w = imgsize[0]-(self.m_margins[0]+self.m_margins[2])*self.reduce*scale
+                    h = imgsize[1]-(self.m_margins[1]+self.m_margins[3])*self.reduce*scale
+                    (x, y), fsize = find_fontsize(int(w),int(h),self.queue[0]['args']['file'],self.word)
+                    m1, m2 = self.m_margins[0]*self.reduce*scale, self.m_margins[1]*self.reduce*scale
+                font = ImageFont.truetype(self.queue[0]['args']['file'],fsize)
                 draw = ImageDraw.Draw(self.img)
-                draw.text(
-                    (round(x+self.margins[0]*scale), 
-                    round(y+self.margins[1]*scale)),
-                    self.word,self.cmap[0],font=font)
+                draw.text( (int(x+m1), int(y+m2)), self.word,self.queue[0]['args']['color'],font=font)
 
         self.img = self._alpha_effect(scale).convert('RGB')
 

@@ -2,6 +2,7 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from collections import Counter
 import threading 
 
@@ -117,21 +118,20 @@ def cook_soup(s):
     if not isinstance(s, BeautifulSoup):
         return ""
 
-    for each in s.find_all(['script','style','h1','h2','h3','h4','textarea','input','button','form']):
+    for each in s.find_all(['script','style','textarea','input','button','form']):
         each.decompose()
 
-    for each in s.find_all(['p','blockquote']):
-        text += each.get_text()
+    for each in s.find_all(['p','blockquote','h1','h2','h3','h4']):
+        text += ' ' + each.get_text()
         
     if text !="":
         return text
 
-    for body in s.find_all('body'):
-        for each in body.contents:
-            try:
-                text += ' ' + each.get_text()
-            except:
-                pass
+    for each in s.contents:
+        try:
+            text += ' ' + each.get_text()
+        except:
+            pass
     return text
 
 def clean_text(t):
@@ -139,8 +139,8 @@ def clean_text(t):
     Remove newlines and punctuation symbols
     keeping dash and $
     '''
-    result = t.replace("\n","").lower()
-    result = "".join([ char if char not in '!"%&\'()*,./:;<=>?[\\]^_`{|}~' else ' ' for char in result ])
+    result = t.replace("\n"," ").lower()
+    result = "".join([ char if char not in '”—–“,!"&\'’()*/:;<=>?[\\]^_`{|}~⟨⟩' else ' ' for char in result ])
     return result
 
 def get_words(query,id,clarify):
@@ -170,20 +170,26 @@ def get_words(query,id,clarify):
     for num in range(0,len(threads)):
         threads[num].join()
 
-    contents = []
+
 
     log_progress(id,2)
 
-    for each in soups:
-        contents.append(clean_text(cook_soup(each)))
-
     sw = set(stopwords.words('english'))
-    sw.add('also')
-    sw.add('loading')
+    for each in ['also','loading',"ll","if","s","nt","...","..","re","m","-the","d","-i","––","--"]:
+        sw.add(each)
 
+    #version without NLTK
+    #contents = []
+    #for each in soups:
+    #    contents.append(clean_text(cook_soup(each)))
+    #total_count = Counter([
+    #    word for word in (" ".join(contents)).split(" ")
+    #    if len(word)>1 and word not in sw])
+
+    contents = " ".join([clean_text(cook_soup(each)) for each in soups])
     total_count = Counter([
-        word for word in (" ".join(contents)).split(" ")
-        if len(word)>1 and word not in sw])
+        each for each in word_tokenize(contents.lower()) 
+        if each not in list('0123456789#$+-@%.') and each not in sw])
 
     words_in_order = [ 
         each[0] for each in total_count.most_common(len(total_count)) 

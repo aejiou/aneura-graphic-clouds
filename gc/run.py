@@ -66,14 +66,14 @@ def generate_image(form):
     #defining fonts and text transform for preset styles
     styles = {
         'classic' : { 'fonts': [ 'cloistrk','lucian','raleigh'], 'invert':['belwe','raleigh'], 'transform': [cap] },
-        'minimal' : { 'fonts': [ 'geometr', 'myriadpro','futura'],'invert':[ 'geometr'],'transform':[upper]},
+        'minimal' : { 'fonts': [ 'dejavu','dejavubold'],'invert':[ 'geometr'],'transform':[upper]}, #{ 'fonts': [ 'geometr', 'myriadpro','futura'],'invert':[ 'geometr'],'transform':[upper]},
         'grunge' : { 'fonts': ['distress', 'pantspatrol','polaroid','eklektic'], 'invert':['distress','polaroid'],'transform':[upper,lower]}
     }
 
     style = styles[form['style']]
 
     fonts_to_use = np.array(['fonts/'+name+'.ttf' for name in style['fonts']])
-    fonts_to_use[np.argwhere(fonts_to_use=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
+    #fonts_to_use[np.argwhere(fonts_to_use=="fonts/myriadpro.ttf")] = "fonts/myriadpro.otf"
 
     if t_f(form['mask']):
         fonts_header = ['fonts/'+name+'.ttf' for name in style['invert']]
@@ -111,7 +111,8 @@ def generate_image(form):
     image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
     drops = []
-    stopper = 20 if t_f(form['mask']) else 27
+    stopper = 14 if t_f(form['mask']) else 27
+    small_count = 0
 
     for num,word in enumerate(words):
         if np.random.randint(0,4)==2:
@@ -123,12 +124,22 @@ def generate_image(form):
         drops.append(Droplet(tr(word)))
         drops[-1].fit(fonts_to_use[np.random.randint(0,len(fonts_to_use))])
         #if the mask is very dense cycle can exit prematurely when cycling through central part
-        if image.paste_object(drops[-1])<stopper:
-            if image.paste_object(drops[-1])<stopper:
-                if image.paste_object(drops[-1])<stopper:
-                    if image.paste_object(drops[-1])<stopper:
+        maxrad, pasted = image.paste_object(drops[-1])
+        if maxrad<stopper and not pasted:
+            maxrad, pasted = image.paste_object(drops[-1])
+            if maxrad<stopper and not pasted:
+                maxrad, pasted = image.paste_object(drops[-1])
+                if maxrad<stopper and not pasted:
+                    maxrad, pasted = image.paste_object(drops[-1])
+                    if maxrad<stopper:
                         log_progress(form['identifier'],4,message="No more free space! Finishing")
                         break
+        if maxrad<stopper and pasted:
+            small_count+=1
+        if small_count>6:
+            log_progress(form['identifier'],4,message="No more free space! Finishing")
+            break
+        
 
     log_progress(form['identifier'],5)
     
