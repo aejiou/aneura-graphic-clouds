@@ -12,7 +12,8 @@ $(function() {
       write_message('Information submitted! Starting...','success');
       my_data = sendStyle();
       //document.getElementById("game-layer").style.position = "relative";
-      document.getElementById("game-layer").style.visibility = "visible";
+      var is_mobile = !!navigator.userAgent.match(/iphone|android|blackberry/ig) || false;
+      if (!is_mobile) document.getElementById("game-layer").style.visibility = "visible";
 
       event.preventDefault(); // prevent default submit behaviour
       // get values from FORM
