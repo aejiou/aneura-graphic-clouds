@@ -89,10 +89,12 @@ class WhackAMole {
     }
     
     bonk(mole) {
-        mole.removeClass('up')
-        .addClass('bonked')            
+        mole.addClass('bonked')            
         .one('transitionend', () => {
+                        mole.removeClass('up')
+                        .one('transitionend', () => {
                         mole.removeClass('bonked');
+                        })
         });
         this.score++;
         if (this.total>10){
