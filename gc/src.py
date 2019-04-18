@@ -50,6 +50,7 @@ class Canvas:
         self.w = w
         self.h = h
         self.queue = []
+        self.cmap = None
 
         
     def fit(self,word,fontfile,filemask=None,margins=(50,50,50,50),invert=False):
@@ -94,7 +95,7 @@ class Canvas:
             im = Image.open(filemask).convert('L').resize(self.mask.size, Image.ANTIALIAS)
             self.mask.paste(im,(round((self.mask_w - im.size[0])/2),round((self.mask_h-im.size[1])/2)))
             self.queue.append({'src':'image',
-                               'args':[filemask]})
+                               'args':{'file':filemask,'color':None}})
 
         s_num = [0 if each==1 else ceil(1/each) for each in self.partial]    
         self.slices = []
@@ -200,12 +201,26 @@ class Canvas:
         self.th_mat = self._threshold_matrix(self.mask)
         return maxrad*self.reduce, True
         
-    def render(self,cmap=((255,255,255),(0,0,0)),size=None, margins=(0,0,0,0)):
+    def render(self,cmap=None,size=None, margins=(0,0,0,0),alpha=True):
         '''
         Rendering the final hi-res image from the queue
         and appying alpha gaussian blur.
         '''   
-        self.cmap = cmap
+        if self.cmap != cmap and cmap!=None:
+            if self.cmap==None:
+                self.cmap = cmap
+            new_colors = True
+            bg = cmap[-1]
+            if self.queue[0]['args']['color'] == None:
+                self.queue[0]['args']['color'] = self.cmap[0]
+                self.queue[0]['args']['bg'] = bg
+        else:
+            new_colors = False
+            if self.cmap == None:
+                return 'Initialize with a color map first'
+            else:
+                cmap = self.cmap
+                bg = self.queue[0]['args']['bg']
 
         if size == None:
             size = (self.w,self.h)
@@ -214,14 +229,17 @@ class Canvas:
         scale = min( imgsize[0]/self.w, imgsize[1]/self.h )
         imgsize = ( int(scale*self.w),int(scale*self.h) )
 
-        self.img = Image.new("RGB", imgsize,cmap[-1])
+        self.img = Image.new("RGB", imgsize,bg)
 
         for element in self.queue[1:]:
             if isinstance(element['src'],Droplet):
-                if element['args']['color'] == None:
-                    r_color = np.random.randint(0,len(self.cmap)-1)
-                    element['args']['color'] = r_color
-                img = element['src'].render((self.cmap[element['args']['color']],self.cmap[-1]))
+                if new_colors:
+                    r_color = np.random.randint(0,len(cmap)-1)
+                    if element['args']['color'] == None:
+                        element['args']['color'] = r_color
+                else:
+                    r_color = element['args']['color']
+                img = element['src'].render((cmap[r_color],bg))
                 if element['args']['rotate']:
                     img = img.rotate(90,Image.NEAREST,True)
                 w, h = element['args']['size'][0]*scale, element['args']['size'][1]*scale
@@ -231,8 +249,7 @@ class Canvas:
 
         if self.queue[0]['src']=='font':
             if self.invert==False:
-                if self.queue[0]['args']['color'] == None:
-                    self.queue[0]['args']['color'] = self.cmap[0]
+                r_color = cmap[0] if new_colors else self.queue[0]['args']['color']
                 if scale==1:
                     (x, y), fsize = self.queue[0]['args']['pos'],self.queue[0]['args']['size']
                     m1, m2 = self.margins[0], self.margins[1]
@@ -243,9 +260,10 @@ class Canvas:
                     m1, m2 = self.m_margins[0]*self.reduce*scale, self.m_margins[1]*self.reduce*scale
                 font = ImageFont.truetype(self.queue[0]['args']['file'],fsize)
                 draw = ImageDraw.Draw(self.img)
-                draw.text( (int(x+m1), int(y+m2)), self.word,self.queue[0]['args']['color'],font=font)
+                draw.text( (int(x+m1), int(y+m2)), self.word,r_color,font=font)
 
-        self.img = self._alpha_effect(scale).convert('RGB')
+        if alpha:
+            self.img = self._alpha_effect(scale).convert('RGB')
 
         if margins!=(0,0,0,0):
             new = Image.new("RGB", size, cmap[-1])
