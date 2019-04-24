@@ -134,7 +134,7 @@ class Canvas:
         the mask. Deprecated.
         '''
         def _shape(val,shape='rect'):
-            nonlocal ratio
+            nonlocal ratio, th_mat
             (x,y) = val
             edge = min([x,y,self.mask_h-x,self.mask_w-y])
             if edge==0:
@@ -144,7 +144,7 @@ class Canvas:
             while rad < edge:
                 xr = ceil(rad*ratio[1])
                 yr = ceil(rad*ratio[0])
-                if np.sum(self.th_mat[x-xr:x+1+xr,y-yr:y+1+yr])==0:
+                if np.sum(th_mat[x-xr:x+1+xr,y-yr:y+1+yr])==0:
                     rad +=1
                 else:
                     break
@@ -152,6 +152,8 @@ class Canvas:
 
         (offset_y, offset_x) = offset
         (h, w) = size
+        th_mat = np.ones(self.th_mat.shape)
+        th_mat[offset_y:offset_y + h,offset_x:offset_x + w] = self.th_mat[offset_y:offset_y + h,offset_x:offset_x + w]
         self.den_mat = np.zeros(self.th_mat.shape)-1
         self.den_mat[offset_y:offset_y + h,offset_x:offset_x + w] = -self.th_mat[offset_y:offset_y + h,offset_x:offset_x + w]
         for index_str in self.ind_arr[self.den_mat!=-1]:

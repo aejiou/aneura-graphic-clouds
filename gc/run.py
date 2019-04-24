@@ -50,9 +50,9 @@ def generate_image(form):
     the mask
     '''
     if t_f(form['mask']): 
-        reducer = 800
+        reducer = 900
     else:
-        reducer = 400
+        reducer = 450
 
     #Define region to look for a place for text at a time
     partial = (0.35,1) if t_f(form['mask']) else (0.5,0.5)
@@ -107,7 +107,7 @@ def generate_image(form):
 
 
     #initializing graphic cloud object
-    image = Canvas(w,h,round(w/reducer),partial)
+    image = Canvas(w,h,round(max(w,h)/reducer),partial)
     image.fit(form['concept'],fonts_header[np.random.randint(0,len(fonts_header))],invert=t_f(form['mask']))
 
     drops = []
