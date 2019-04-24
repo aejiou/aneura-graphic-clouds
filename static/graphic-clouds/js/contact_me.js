@@ -51,7 +51,7 @@ $(function() {
           if (status == 'success')
           {
             document.getElementById("game-layer").style.visibility = "hidden";
-            document.getElementById("game-layer").style.position = "absolute";
+            //document.getElementById("game-layer").style.position = "absolute";
             wam.end();
             write_output(JSON.parse(jqXHR.responseText));
             setTimeout(function() {
